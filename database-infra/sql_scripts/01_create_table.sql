@@ -188,7 +188,7 @@ VALUES (
     'DENOU',
     'Jubilee',
     'jub@envhub.ma',                                          -- Email d'authentification
-    'admin123',  -- Remplacer par un vrai hash BCrypt/Argon2
+    '$2a$10$Cvc7n4QJ0wHPbqMNxbzmSujbW4qOwrZkR4iW/QDS3XFO0fsxasgCK',  -- Remplacer par un vrai hash BCrypt/Argon2
     @adminProfilId                                               -- Liaison avec la table Profil
 );
 

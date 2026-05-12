@@ -45,4 +45,5 @@ buildNumber.properties
 .vscode/
 
 # Environment variables
-.env
+*.env
+db.env
