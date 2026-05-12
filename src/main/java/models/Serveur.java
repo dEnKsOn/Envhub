@@ -1,0 +1,60 @@
+package models;
+import java.util.UUID;
+
+/**
+ * @author jub-ubuntu
+ * @version 1.0
+ * @created 26-avr.-2026 01:04:48
+ */
+public class Serveur {
+
+	private UUID idServ;
+	private String adressIP;
+	private String os;
+
+	public Serveur(){
+
+	}
+
+	
+
+	public UUID getIdServ() {
+		return idServ;
+	}
+
+
+
+	public void setIdServ(UUID idServ) {
+		this.idServ = idServ;
+	}
+
+
+
+	public String getAdressIP() {
+		return adressIP;
+	}
+
+
+
+	public void setAdressIP(String adressIP) {
+		this.adressIP = adressIP;
+	}
+
+
+
+	public String getOs() {
+		return os;
+	}
+
+
+
+	public void setOs(String os) {
+		this.os = os;
+	}
+
+
+
+	public void finalize() throws Throwable {
+
+	}
+}//end Serveur
