@@ -29,19 +29,19 @@
         <i data-lucide="network"></i>
         <span>Environnements</span>
       </a>
-      
-      <a href="${pageContext.request.contextPath}/clients" class="nav-item ${pageContext.request.requestURI.contains('clients') ? 'is-active' : ''}">
-        <i data-lucide="briefcase"></i>
-        <span>Clients</span>
-      </a>
     </div>
-
+    
     <div class="nav-group mt-4">
       <p class="nav-group-label">- Administration -</p>
       
       <a href="${pageContext.request.contextPath}/admin/utilisateurs" class="nav-item ${pageContext.request.requestURI.contains('utilisateurs') ? 'is-active' : ''}">
         <i data-lucide="users"></i>
         <span>Utilisateurs</span>
+      </a>
+
+      <a href="${pageContext.request.contextPath}/clients" class="nav-item ${pageContext.request.requestURI.contains('clients') ? 'is-active' : ''}">
+        <i data-lucide="briefcase"></i>
+        <span>Clients</span>
       </a>
       
       <a href="${pageContext.request.contextPath}/admin/serveurs" class="nav-item ${pageContext.request.requestURI.contains('serveurs') ? 'is-active' : ''}">
