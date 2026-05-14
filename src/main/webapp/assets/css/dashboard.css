@@ -1,0 +1,176 @@
+/**
+ * dashboard.css — Composants de Contenu (EnvHub)
+ * Gère les Cards, Grilles métiers, Progress Bars et Couleurs d'états
+ */
+
+/* =========================================
+   CARDS (Cartes de données)
+   ========================================= */
+.section-title { 
+  font-size: 1.5rem; 
+  margin-bottom: 0.5rem; 
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: var(--radius-md);
+  /* Ombre extraite du login pour un effet flottant premium */
+  box-shadow: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
+}
+
+.card-header { padding: 1.5rem 1.5rem 0; }
+.card-body { padding: 1.5rem; }
+.card-title { font-size: 1rem; }
+
+/* =========================================
+   GRILLES ET ESPACEMENTS METIERS
+   ========================================= */
+.stack { display: flex; flex-direction: column; }
+.stack-sm { gap: 1.25rem; }
+.stack-lg { gap: 2.5rem; }
+
+.grid { display: grid; gap: 1.5rem; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.mt-2 { margin-top: 0.75rem; }
+.text-xs { font-size: 0.75rem; }
+.text-muted-foreground { color: var(--text-muted); }
+
+/* =========================================
+   PROGRESS BARS
+   ========================================= */
+.progress-bar {
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--text-main);
+}
+
+/* =========================================
+   COULEURS SEMANTIQUES (Statuts, Indicateurs)
+   ========================================= */
+:root {
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #B91C1C;
+  --info: #3b82f6;
+}
+
+/* Variations de remplissage pour les barres */
+.progress-fill.bg-green-500 { background: var(--success); }
+.progress-fill.bg-amber-500 { background: var(--warning); }
+.progress-fill.bg-blue-500 { background: var(--info); }
+
+/* Variations de texte pour les compteurs/icônes */
+.text-green-600 { color: var(--success); }
+.text-red-500 { color: var(--danger); }
+.text-blue-500 { color: var(--info); }
+.text-amber-500 { color: var(--warning); }
+
+/* --- Responsive (Dashboard Content) --- */
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-4 { grid-template-columns: 1fr; }
+}
+/* --- Modals --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  width: min(460px, 100%);
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.98);
+  box-shadow: 0 28px 80px rgba(12, 22, 37, 0.16);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 1.5rem 0.75rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.modal-body {
+  padding: 0 1.5rem 1.25rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.btn-secondary {
+  background: var(--background);
+  color: var(--text-main);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.btn-secondary:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #991b1b;
+}
