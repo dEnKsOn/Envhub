@@ -10,6 +10,7 @@ public class Client {
 
 	private UUID idClient;
 	private String nomClient;
+	private String prenomClient;
 	private String entrepriseClient;
 	public Projet projet;
 
@@ -39,6 +40,18 @@ public class Client {
 
 	public void setNomClient(String nomClient) {
 		this.nomClient = nomClient;
+	}
+
+
+
+	public String getPrenomClient() {
+		return prenomClient;
+	}
+
+
+
+	public void setPrenomClient(String prenomClient) {
+		this.prenomClient = prenomClient;
 	}
 
 
