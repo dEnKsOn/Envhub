@@ -57,6 +57,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <script src="${pageContext.request.contextPath}/assets/js/dashboard.js"></script>
+  <script src="${pageContext.request.contextPath}/assets/js/utilisateurs.js"></script>
 
 </body>
 </html>

@@ -14,7 +14,7 @@ services:
       - "${DB_PORT}:3306"
     volumes:
       - envhub_data:/var/lib/mysql/
-      - ./sql_scripts:/docker-entrypoint-initdb.d 
+      - ./sql_scripts:/docker-entrypoint-initdb.d
 
 volumes:
   envhub_data:

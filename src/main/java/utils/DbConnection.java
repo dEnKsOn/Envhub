@@ -8,6 +8,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class DbConnection {
     
     private static final Dotenv dotenv = Dotenv.configure()
+            .directory("/home/jub-ubuntu/Documents/EnvHub/resources")            
             .filename("db.env")
             .ignoreIfMissing()
             .load();
@@ -15,7 +16,7 @@ public class DbConnection {
     private static final String dbUser = dotenv.get("MYSQL_USER");
     private static final String dbPassword = dotenv.get("MYSQL_PASSWORD");
     private static final String dbHost = dotenv.get("MYSQL_HOST");
-    private static final String dbPort = dotenv.get("MYSQL_PORT");
+    private static final String dbPort = dotenv.get("DB_PORT");
     private static final String dbName = dotenv.get("MYSQL_DATABASE");
 
     private static final String URL = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName 

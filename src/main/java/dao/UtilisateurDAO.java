@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +16,8 @@ import java.util.UUID;
 public class UtilisateurDAO implements IGenericDAO<Utilisateur, UUID> {
 
     public Utilisateur authenticate(String email, String passwordSaisi) {
-        String query = "SELECT u.idUser, u.nomUser, u.prenomUser, u.email, u.password, u.idProfil, p.libelle " +
+        // CORRECTION ICI : Ajout de u.genre dans le SELECT
+        String query = "SELECT u.idUser, u.nomUser, u.prenomUser, u.genre, u.email, u.password, u.idProfil, p.libelle " +
                 "FROM Utilisateur u " +
                 "JOIN Profil p ON u.idProfil = p.idProfil " +
                 "WHERE u.email = ?";
@@ -93,9 +93,40 @@ public class UtilisateurDAO implements IGenericDAO<Utilisateur, UUID> {
         return utilisateurs;
     }
 
+    public List<Utilisateur> search(String query) {
+        List<Utilisateur> utilisateurs = new ArrayList<>();
+        String sql = "SELECT u.*, p.libelle FROM Utilisateur u " +
+                     "JOIN Profil p ON u.idProfil = p.idProfil " +
+                     "WHERE LOWER(u.nomUser) LIKE ? " +
+                     "OR LOWER(u.prenomUser) LIKE ? " +
+                     "OR LOWER(u.email) LIKE ? " +
+                     "ORDER BY u.prenomUser, u.nomUser";
+
+        String searchTerm = "%" + query.toLowerCase() + "%";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, searchTerm);
+            stmt.setString(2, searchTerm);
+            stmt.setString(3, searchTerm);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Utilisateur user = mapUtilisateur(rs);
+                    user.setPassword(null);
+                    utilisateurs.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la recherche des utilisateurs : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return utilisateurs;
+    }
+
     @Override
     public boolean save(Utilisateur entity) {
-        String sql = "INSERT INTO Utilisateur (idUser, nomUser, prenomUser, email, password, idProfil) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Utilisateur (idUser, nomUser, prenomUser, genre, email, password, idProfil) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -107,9 +138,10 @@ public class UtilisateurDAO implements IGenericDAO<Utilisateur, UUID> {
             stmt.setString(1, entity.getIdUser().toString());
             stmt.setString(2, entity.getNomUser());
             stmt.setString(3, entity.getPrenomUser());
-            stmt.setString(4, entity.getEmail());
-            stmt.setString(5, entity.getPassword());
-            stmt.setInt(6, entity.getProfil().getIdProfil());
+            stmt.setString(4, entity.getGenre());
+            stmt.setString(5, entity.getEmail());
+            stmt.setString(6, entity.getPassword());
+            stmt.setInt(7, entity.getProfil().getIdProfil());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -121,23 +153,27 @@ public class UtilisateurDAO implements IGenericDAO<Utilisateur, UUID> {
 
     @Override
     public boolean update(Utilisateur entity) {
-        String sql = "UPDATE Utilisateur SET nomUser = ?, prenomUser = ?, email = ?, password = ?, idProfil = ? WHERE idUser = ?";
+        boolean updatePassword = entity.getPassword() != null && !entity.getPassword().isEmpty();
+        String sql = updatePassword
+                ? "UPDATE Utilisateur SET nomUser = ?, prenomUser = ?, genre = ?, email = ?, password = ?, idProfil = ? WHERE idUser = ?"
+                : "UPDATE Utilisateur SET nomUser = ?, prenomUser = ?, genre = ?, email = ?, idProfil = ? WHERE idUser = ?";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, entity.getNomUser());
             stmt.setString(2, entity.getPrenomUser());
-            stmt.setString(3, entity.getEmail());
+            stmt.setString(3, entity.getGenre());
+            stmt.setString(4, entity.getEmail());
 
-            if (entity.getPassword() != null) {
-                stmt.setString(4, entity.getPassword());
+            if (updatePassword) {
+                stmt.setString(5, entity.getPassword());
+                stmt.setInt(6, entity.getProfil().getIdProfil());
+                stmt.setString(7, entity.getIdUser().toString());
             } else {
-                stmt.setNull(4, Types.VARCHAR);
+                stmt.setInt(5, entity.getProfil().getIdProfil());
+                stmt.setString(6, entity.getIdUser().toString());
             }
-
-            stmt.setInt(5, entity.getProfil().getIdProfil());
-            stmt.setString(6, entity.getIdUser().toString());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -168,6 +204,7 @@ public class UtilisateurDAO implements IGenericDAO<Utilisateur, UUID> {
         user.setIdUser(UUID.fromString(rs.getString("idUser")));
         user.setNomUser(rs.getString("nomUser"));
         user.setPrenomUser(rs.getString("prenomUser"));
+        user.setGenre(rs.getString("genre"));
         user.setEmail(rs.getString("email"));
         user.setPassword(rs.getString("password"));
 

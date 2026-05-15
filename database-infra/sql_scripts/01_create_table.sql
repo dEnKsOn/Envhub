@@ -182,11 +182,12 @@ INSERT INTO `Profil` (libelle) VALUES ('Administrateur');
 SET @adminProfilId = LAST_INSERT_ID();
 
 -- 3. Insertion de l'utilisateur Administrateur
-INSERT INTO Utilisateur (idUser, nomUser, prenomUser, email, password, idProfil)
+INSERT INTO Utilisateur (idUser, nomUser, prenomUser,genre ,email, password, idProfil)
 VALUES (
     UUID(),                                                      -- Génération native de l'UUID
     'DENOU',
     'Jubilee',
+    'Masculin',
     'jub@envhub.ma',                                          -- Email d'authentification
     '$2a$10$Cvc7n4QJ0wHPbqMNxbzmSujbW4qOwrZkR4iW/QDS3XFO0fsxasgCK',  -- Remplacer par un vrai hash BCrypt/Argon2
     @adminProfilId                                               -- Liaison avec la table Profil
