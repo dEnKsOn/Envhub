@@ -3,5 +3,7 @@
 <%
     request.setAttribute("pageTitle", "Utilisateurs - EnvHub");
     request.setAttribute("pageContent", "/WEB-INF/views/admin/utilisateurs.jsp");
+    request.setAttribute("pageCss", "/assets/css/utilisateur.css");
+    request.setAttribute("pageJs", "/assets/js/utilisateurs.js");
 %>
 <jsp:include page="/WEB-INF/views/base_layout.jsp" />

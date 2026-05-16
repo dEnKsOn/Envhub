@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
-
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/utilisateur.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/utilisateurs.css">
 
 <div class="stack stack-lg">
   
