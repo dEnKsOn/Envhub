@@ -53,7 +53,7 @@ public class LoginServlet extends HttpServlet {
         Utilisateur user = utilisateurDAO.authenticate(email, password);
         
         if (user != null) {
-            // 3. Prévention contre la fixation de session
+            // 3. Prévention contre la fixation ide session
             HttpSession oldSession = request.getSession(false);
             if (oldSession != null) {
                 oldSession.invalidate();

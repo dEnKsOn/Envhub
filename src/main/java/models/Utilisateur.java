@@ -12,6 +12,7 @@ public class Utilisateur {
 	private String nomUser;
 	private String prenomUser;
 	private String email;
+	private String genre;
 	private String password;
 	public Profil profil;
 
@@ -73,6 +74,13 @@ public class Utilisateur {
 		return password;
 	}
 
+	public String getGenre() {
+		return genre;
+	}
+
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
 
 
 	public void setPassword(String password) {

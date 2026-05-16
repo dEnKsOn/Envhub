@@ -55,7 +55,12 @@
       });
     });
   }
-
+  /** Rafraîchir les icônes Lucide après modification du DOM */
+  window.refreshLucideIcons = function() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
   function normalizePath(path) {
     var normalized = path.replace(/\/+$/, '');
     if (normalized === '') {
@@ -91,6 +96,24 @@
     if (title) {
       document.title = title;
       updatePageHeading(title);
+    }
+
+    // Ré-exécuter les scripts injectés via AJAX
+    var scripts = pageContainer.querySelectorAll('script');
+    scripts.forEach(function(oldScript) {
+      var newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(function(attr) {
+        newScript.setAttribute(attr.name, attr.value);
+      });
+      newScript.text = oldScript.text;
+      if (oldScript.parentNode) {
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      }
+    });
+
+    // Rafraîchir les icônes Lucide après injection
+    if (typeof window.refreshLucideIcons === 'function') {
+      window.refreshLucideIcons();
     }
   }
 
@@ -219,10 +242,18 @@
 
   /** Initialisation */
   function init() {
+    function renderLucideIcons() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+    
+    // Si Lucide est déjà chargé, l'utiliser immédiatement
     if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
+      renderLucideIcons();
     } else {
-      console.error('ERREUR : La bibliothèque Lucide Icons n\'est pas chargée. Vérifiez le lien <script> dans votre base_layout.jsp.');
+      // Sinon, attendre que Lucide soit chargé
+      window.addEventListener('lucideReady', renderLucideIcons);
     }
 
     initSidebar();
