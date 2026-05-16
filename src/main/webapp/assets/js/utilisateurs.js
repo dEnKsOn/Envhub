@@ -1,3 +1,72 @@
+// --- Initialisation locale (s'exécute à chaque chargement) ---
+(function initUtilisateursLocal() {
+  // --- Filtre Instantané ---
+  const searchInput = document.getElementById('search-input');
+  const searchForm = document.getElementById('search-form');
+  const tableBody = document.getElementById('users-table-body');
+  
+  if (searchInput && tableBody) {
+    searchInput.addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      const rows = tableBody.querySelectorAll('tr');
+      let hasVisibleRows = false;
+      
+      rows.forEach(row => {
+        // Ignorer la ligne de message vide ("Aucun utilisateur")
+        if (row.cells.length > 1) {
+          const text = row.textContent.toLowerCase();
+          if (text.includes(term)) {
+            row.style.display = '';
+            hasVisibleRows = true;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+      });
+
+      const noResultsMessage = document.getElementById('no-results-message');
+      const noResultsQuery = document.getElementById('no-results-query');
+      if (noResultsMessage && noResultsQuery) {
+        if (!hasVisibleRows && term.trim() !== '') {
+          noResultsQuery.textContent = e.target.value;
+          noResultsMessage.style.display = 'flex';
+        } else {
+          noResultsMessage.style.display = 'none';
+        }
+      }
+    });
+
+    // Empêcher la soumission classique du formulaire vu que la recherche est instantanée
+    if (searchForm) {
+      searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+      });
+    }
+  }
+
+  // --- Validation Formulaire (Email) ---
+  const userModalForm = document.getElementById('user-modal-form');
+  const emailInput = document.getElementById('email');
+  const emailError = document.getElementById('email-error');
+
+  if (userModalForm && emailInput && emailError) {
+    userModalForm.addEventListener('submit', function(e) {
+      const emailVal = emailInput.value.trim().toLowerCase();
+      if (!emailVal.endsWith('@envhub.ma')) {
+        e.preventDefault(); // Empêcher la soumission
+        emailError.style.display = 'block';
+        emailInput.style.borderColor = 'var(--danger)';
+      }
+    });
+
+    // Cacher l'erreur dès que l'utilisateur modifie l'email
+    emailInput.addEventListener('input', function() {
+      emailError.style.display = 'none';
+      emailInput.style.borderColor = '';
+    });
+  }
+})();
+
 // Gestion des événements via délégation pour supporter le chargement AJAX
 if (!window.utilisateursJsInitialized) {
   window.utilisateursJsInitialized = true;
@@ -146,72 +215,6 @@ if (!window.utilisateursJsInitialized) {
       closeModal(e.target);
     }
   });
-
-  // --- Filtre Instantané ---
-  const searchInput = document.getElementById('search-input');
-  const searchForm = document.getElementById('search-form');
-  const tableBody = document.getElementById('users-table-body');
-  
-  if (searchInput && tableBody) {
-    searchInput.addEventListener('input', function(e) {
-      const term = e.target.value.toLowerCase();
-      const rows = tableBody.querySelectorAll('tr');
-      let hasVisibleRows = false;
-      
-      rows.forEach(row => {
-        // Ignorer la ligne de message vide ("Aucun utilisateur")
-        if (row.cells.length > 1) {
-          const text = row.textContent.toLowerCase();
-          if (text.includes(term)) {
-            row.style.display = '';
-            hasVisibleRows = true;
-          } else {
-            row.style.display = 'none';
-          }
-        }
-      });
-
-      const noResultsMessage = document.getElementById('no-results-message');
-      const noResultsQuery = document.getElementById('no-results-query');
-      if (noResultsMessage && noResultsQuery) {
-        if (!hasVisibleRows && term.trim() !== '') {
-          noResultsQuery.textContent = e.target.value;
-          noResultsMessage.style.display = 'flex';
-        } else {
-          noResultsMessage.style.display = 'none';
-        }
-      }
-    });
-
-    // Empêcher la soumission classique du formulaire vu que la recherche est instantanée
-    if (searchForm) {
-      searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-      });
-    }
-  }
-
-  // --- Validation Formulaire (Email) ---
-  const userModalForm = document.getElementById('user-modal-form');
-  const emailInput = document.getElementById('email');
-  const emailError = document.getElementById('email-error');
-
-  if (userModalForm && emailInput && emailError) {
-    userModalForm.addEventListener('submit', function(e) {
-      const emailVal = emailInput.value.trim().toLowerCase();
-      if (!emailVal.endsWith('@envhub.ma')) {
-        e.preventDefault(); // Empêcher la soumission
-        emailError.style.display = 'block';
-        emailInput.style.borderColor = 'var(--danger)';
-      }
-    });
-
-    // Cacher l'erreur dès que l'utilisateur modifie l'email
-    emailInput.addEventListener('input', function() {
-      emailError.style.display = 'none';
-      emailInput.style.borderColor = '';
-    });
-  }
 }
 
 // S'assurer que les icônes sont rendues immédiatement si on vient d'injecter la page

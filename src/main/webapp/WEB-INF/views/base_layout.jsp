@@ -9,6 +9,9 @@
   
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/layout.css">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+  <c:if test="${not empty pageCss}">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}${pageCss}">
+  </c:if>
 </head>
 <body>
 
@@ -30,6 +33,9 @@
               <jsp:include page="/WEB-INF/views/admin/dashboard-stats.jsp" />
             </c:otherwise>
           </c:choose>
+          <c:if test="${not empty pageJs}">
+            <script src="${pageContext.request.contextPath}${pageJs}"></script>
+          </c:if>
         </div>
       </main>
 
@@ -57,7 +63,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <script src="${pageContext.request.contextPath}/assets/js/dashboard.js"></script>
-  <script src="${pageContext.request.contextPath}/assets/js/utilisateurs.js"></script>
 
 </body>
 </html>
