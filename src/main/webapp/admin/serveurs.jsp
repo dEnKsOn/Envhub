@@ -3,5 +3,7 @@
 <%
     request.setAttribute("pageTitle", "Serveurs - EnvHub");
     request.setAttribute("pageContent", "/WEB-INF/views/admin/serveurs.jsp");
+    request.setAttribute("pageCss", "/assets/css/serveurs.css");
+    request.setAttribute("pageJs", "/assets/js/serveurs.js");
 %>
 <jsp:include page="/WEB-INF/views/base_layout.jsp" />
