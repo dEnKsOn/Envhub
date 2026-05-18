@@ -11,50 +11,45 @@ public class Serveur {
 	private UUID idServ;
 	private String adressIP;
 	private String os;
+	private int nombreEnvironnements;
 
 	public Serveur(){
 
 	}
 
-	
-
 	public UUID getIdServ() {
 		return idServ;
 	}
-
-
 
 	public void setIdServ(UUID idServ) {
 		this.idServ = idServ;
 	}
 
-
-
 	public String getAdressIP() {
 		return adressIP;
 	}
-
-
 
 	public void setAdressIP(String adressIP) {
 		this.adressIP = adressIP;
 	}
 
-
-
 	public String getOs() {
 		return os;
 	}
-
-
 
 	public void setOs(String os) {
 		this.os = os;
 	}
 
+	public int getNombreEnvironnements() {
+		return nombreEnvironnements;
+	}
 
+	public void setNombreEnvironnements(int nombreEnvironnements) {
+		this.nombreEnvironnements = nombreEnvironnements;
+	}
 
 	public void finalize() throws Throwable {
 
 	}
-}//end Serveur
+}

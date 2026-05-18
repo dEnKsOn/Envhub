@@ -13,9 +13,26 @@ import utils.DbConnection;
 
 public class ServeurDAO implements IGenericDAO<Serveur, UUID> {
 
+    private Serveur mapServeur(ResultSet rs) throws SQLException {
+        Serveur serveur = new Serveur();
+        serveur.setIdServ(UUID.fromString(rs.getString("idServ")));
+        serveur.setAdressIP(rs.getString("adressIP"));
+        serveur.setOs(rs.getString("os"));
+        try {
+            serveur.setNombreEnvironnements(rs.getInt("nombreEnvironnements"));
+        } catch (SQLException e) {
+            serveur.setNombreEnvironnements(0);
+        }
+        return serveur;
+    }
+
     @Override
     public Serveur findById(UUID id) {
-        String sql = "SELECT * FROM Serveur WHERE idServ = ?";
+        String sql = "SELECT s.idServ, s.adressIP, s.os, COUNT(e.idEnv) as nombreEnvironnements " +
+                     "FROM Serveur s " +
+                     "LEFT JOIN Environnement e ON s.idServ = e.idServ " +
+                     "WHERE s.idServ = ? " +
+                     "GROUP BY s.idServ, s.adressIP, s.os";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -36,7 +53,11 @@ public class ServeurDAO implements IGenericDAO<Serveur, UUID> {
     @Override
     public List<Serveur> findAll() {
         List<Serveur> serveurs = new ArrayList<>();
-        String sql = "SELECT * FROM Serveur ORDER BY adressIP ASC";
+        String sql = "SELECT s.idServ, s.adressIP, s.os, COUNT(e.idEnv) as nombreEnvironnements " +
+                     "FROM Serveur s " +
+                     "LEFT JOIN Environnement e ON s.idServ = e.idServ " +
+                     "GROUP BY s.idServ, s.adressIP, s.os " +
+                     "ORDER BY s.adressIP ASC";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -52,6 +73,61 @@ public class ServeurDAO implements IGenericDAO<Serveur, UUID> {
         return serveurs;
     }
 
+    public List<Serveur> search(String query) {
+        List<Serveur> serveurs = new ArrayList<>();
+        String sql = "SELECT s.idServ, s.adressIP, s.os, COUNT(e.idEnv) as nombreEnvironnements " +
+                     "FROM Serveur s " +
+                     "LEFT JOIN Environnement e ON s.idServ = e.idServ " +
+                     "WHERE LOWER(s.adressIP) LIKE ? " +
+                     "OR LOWER(s.os) LIKE ? " +
+                     "GROUP BY s.idServ, s.adressIP, s.os " +
+                     "ORDER BY s.adressIP ASC";
+
+        String searchTerm = "%" + query.toLowerCase() + "%";
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, searchTerm);
+            stmt.setString(2, searchTerm);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    serveurs.add(mapServeur(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la recherche des serveurs : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return serveurs;
+    }
+
+    public boolean isIpExists(String ip, UUID excludeId) {
+        String sql = "SELECT COUNT(*) FROM Serveur WHERE adressIP = ?";
+        if (excludeId != null) {
+            sql += " AND idServ != ?";
+        }
+
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, ip);
+            if (excludeId != null) {
+                stmt.setString(2, excludeId.toString());
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la vérification de l'IP : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     @Override
     public boolean save(Serveur entity) {
         String sql = "INSERT INTO Serveur (idServ, adressIP, os) VALUES (?, ?, ?)";
@@ -59,6 +135,10 @@ public class ServeurDAO implements IGenericDAO<Serveur, UUID> {
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            if (entity.getIdServ() == null) {
+                entity.setIdServ(UUID.randomUUID());
+            }
+            
             stmt.setString(1, entity.getIdServ().toString());
             stmt.setString(2, entity.getAdressIP());
             stmt.setString(3, entity.getOs());
@@ -102,13 +182,5 @@ public class ServeurDAO implements IGenericDAO<Serveur, UUID> {
             e.printStackTrace();
         }
         return false;
-    }
-
-    private Serveur mapServeur(ResultSet rs) throws SQLException {
-        Serveur serveur = new Serveur();
-        serveur.setIdServ(UUID.fromString(rs.getString("idServ")));
-        serveur.setAdressIP(rs.getString("adressIP"));
-        serveur.setOs(rs.getString("os"));
-        return serveur;
     }
 }
