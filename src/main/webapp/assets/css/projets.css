@@ -1,0 +1,261 @@
+/**
+ * projets.css — Cohérence Visuelle EnvHub
+ * Aligné sur layout global et autres menus
+ */
+
+/* =========================================
+   1. VARIABLES DE PORTÉE LOCALE (Sync Login)
+   ========================================= */
+:root {
+  --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
+  --focus-glow: 0 0 0 3px rgba(100, 116, 139, 0.15);
+  --bg-input: #FAFAF9;
+}
+
+/* =========================================
+   2. RECHERCHE ET FILTRES
+   ========================================= */
+.search-form {
+  display: flex;
+  gap: 12px;
+  background: var(--bg-surface);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-tech);
+}
+
+.search-input-wrapper {
+  flex: 1;
+}
+
+.search-input-wrapper input {
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper input:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-surface);
+  box-shadow: var(--focus-ring);
+}
+
+/* =========================================
+   3. TABLEAU DES PROJETS
+   ========================================= */
+.table-responsive {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-tech);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: #FAFAFA;
+  padding: 14px 24px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1.5px solid var(--border-light);
+  text-align: left;
+}
+
+.data-table td {
+  padding: 16px 24px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(241, 245, 249, 0.5);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================
+   4. COMPOSANTS SPÉCIFIQUES PROJETS
+   ========================================= */
+.badge-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border-light);
+  background: #FAFAFA;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.progress-container {
+    background-color: var(--border-light, #e2e8f0);
+    border-radius: 999px;
+    height: 6px;
+    width: 100%;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: var(--primary, #3b82f6);
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.progress-wrapper {
+    min-width: 120px;
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.badge-status.EN_COURS { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+.badge-status.EN_PAUSE { background: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+.badge-status.LIVRE { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-status.ANNULE { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* =========================================
+   5. MODALES ET ICÔNES
+   ========================================= */
+#projet-modal .modal-card {
+  width: min(650px, 95vw);
+}
+
+.modal-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #0C1625;
+  border-radius: 12px;
+  margin-right: 16px;
+}
+
+.modal-header-content {
+  display: flex;
+  align-items: center;
+}
+
+.modal-header-content h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.modal-header-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon i,
+.input-with-icon svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94A3B8;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.input-with-icon .form-control {
+  padding-left: 42px;
+  width: 100%;
+}
+
+/* =========================================
+   6. ÉLÉMENTS DE FORMULAIRE
+   ========================================= */
+.form-group label {
+  color: #324155;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.form-control {
+  width: 100%;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: var(--text-main);
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-surface);
+  box-shadow: var(--focus-ring);
+}
+
+/* =========================================
+   7. ALERTES ET MESSAGES
+   ========================================= */
+.alert {
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.alert-success {
+  background-color: #F0FDF4;
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.2);
+}
+
+.alert-danger {
+  background-color: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid rgba(185, 28, 28, 0.2);
+}
+
+.search-result-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =========================================
+   8. UTILITAIRES DE TEXTE
+   ========================================= */
+.text-right { text-align: right; }
+.text-red-500 { color: var(--danger); }
+.text-xs { font-size: 0.75rem; }
