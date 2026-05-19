@@ -132,6 +132,28 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         return false;
     }
 
+    public List<Environnement> findByProjet(UUID idProjet) {
+        List<Environnement> environnements = new ArrayList<>();
+        String sql = "SELECT e.*, s.adressIP, s.os FROM Environnement e " +
+                     "LEFT JOIN Serveur s ON e.idServ = s.idServ " +
+                     "WHERE e.idProjet = ? ORDER BY e.typeEnv ASC, e.nomBaseDeDonnees ASC";
+
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idProjet.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    environnements.add(mapEnvironnement(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des environnements du projet : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return environnements;
+    }
+
     private Environnement mapEnvironnement(ResultSet rs) throws SQLException {
         Environnement environnement = new Environnement();
         environnement.setIdEnv(UUID.fromString(rs.getString("idEnv")));

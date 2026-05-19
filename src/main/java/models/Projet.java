@@ -19,7 +19,10 @@ public class Projet {
 	private Date dateLancement;
 	private Date dateLivraisonEstimee;
 	private StatutProjet statutProjet;
+	private int pourcentageAvancement;
 	private String nomClient;
+	private String entrepriseClient;
+	private int nombreEnvironnements;
 	private List<Environnement> environnements = new ArrayList<>();
 	public Environnement environnement;
 
@@ -87,6 +90,14 @@ public class Projet {
 		this.statutProjet = statutProjet;
 	}
 
+	public int getPourcentageAvancement() {
+		return pourcentageAvancement;
+	}
+
+	public void setPourcentageAvancement(int pourcentageAvancement) {
+		this.pourcentageAvancement = pourcentageAvancement;
+	}
+
 
 	public Environnement getEnvironnement() {
 		return environnement;
@@ -111,6 +122,22 @@ public class Projet {
 
 	public void setNomClient(String nomClient) {
 		this.nomClient = nomClient;
+	}
+
+	public String getEntrepriseClient() {
+		return entrepriseClient;
+	}
+
+	public void setEntrepriseClient(String entrepriseClient) {
+		this.entrepriseClient = entrepriseClient;
+	}
+
+	public int getNombreEnvironnements() {
+		return nombreEnvironnements;
+	}
+
+	public void setNombreEnvironnements(int nombreEnvironnements) {
+		this.nombreEnvironnements = nombreEnvironnements;
 	}
 
 	public List<Environnement> getEnvironnements() {
