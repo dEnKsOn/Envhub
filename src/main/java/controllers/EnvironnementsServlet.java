@@ -20,6 +20,6 @@ public class EnvironnementsServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        request.getRequestDispatcher("/environnements.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/admin/environnements");
     }
 }

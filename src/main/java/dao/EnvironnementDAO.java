@@ -16,11 +16,19 @@ import utils.DbConnection;
 
 public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
 
+    private static final String BASE_SELECT =
+            "SELECT e.*, p.nomProjet, s.adressIP, s.os "
+            + "FROM Environnement e "
+            + "INNER JOIN Projet p ON e.idProjet = p.idProjet "
+            + "LEFT JOIN Serveur s ON e.idServ = s.idServ ";
+
+    private static final String ORDER_BY_LIST =
+            "ORDER BY FIELD(e.typeEnv, 'PRODUCTION', 'STAGING', 'DEVELOPPEMENT', 'LOCAL'), "
+            + "p.nomProjet ASC, e.nomBaseDeDonnees ASC";
+
     @Override
     public Environnement findById(UUID id) {
-        String sql = "SELECT e.*, s.adressIP, s.os FROM Environnement e " +
-                     "LEFT JOIN Serveur s ON e.idServ = s.idServ " +
-                     "WHERE e.idEnv = ?";
+        String sql = BASE_SELECT + "WHERE e.idEnv = ?";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -40,9 +48,12 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
 
     @Override
     public List<Environnement> findAll() {
+        return findAllOrdered();
+    }
+
+    public List<Environnement> findAllOrdered() {
         List<Environnement> environnements = new ArrayList<>();
-        String sql = "SELECT e.*, s.adressIP, s.os FROM Environnement e " +
-                     "LEFT JOIN Serveur s ON e.idServ = s.idServ ORDER BY e.nomBaseDeDonnees ASC";
+        String sql = BASE_SELECT + ORDER_BY_LIST;
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -58,10 +69,45 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         return environnements;
     }
 
+    public List<Environnement> search(String query) {
+        List<Environnement> environnements = new ArrayList<>();
+        String sql = BASE_SELECT
+                + "WHERE LOWER(p.nomProjet) LIKE ? "
+                + "OR LOWER(COALESCE(s.adressIP, '')) LIKE ? "
+                + "OR LOWER(e.typeEnv) LIKE ? "
+                + "OR LOWER(COALESCE(e.nomBaseDeDonnees, '')) LIKE ? "
+                + ORDER_BY_LIST;
+
+        String pattern = "%" + query.toLowerCase() + "%";
+
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, pattern);
+            stmt.setString(2, pattern);
+            stmt.setString(3, pattern);
+            stmt.setString(4, pattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    environnements.add(mapEnvironnement(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la recherche d'environnements : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return environnements;
+    }
+
     @Override
     public boolean save(Environnement entity) {
-        String sql = "INSERT INTO Environnement (idEnv, typeEnv, nomBaseDeDonnees, urlFront, urlBack, notes, idProjet, idServ) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        if (entity.getIdEnv() == null) {
+            entity.setIdEnv(UUID.randomUUID());
+        }
+
+        String sql = "INSERT INTO Environnement (idEnv, typeEnv, nomBaseDeDonnees, urlFront, urlBack, notes, idProjet, idServ) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -89,8 +135,8 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
 
     @Override
     public boolean update(Environnement entity) {
-        String sql = "UPDATE Environnement SET typeEnv = ?, nomBaseDeDonnees = ?, urlFront = ?, urlBack = ?, notes = ?, idProjet = ?, idServ = ? " +
-                     "WHERE idEnv = ?";
+        String sql = "UPDATE Environnement SET typeEnv = ?, nomBaseDeDonnees = ?, urlFront = ?, urlBack = ?, notes = ?, idProjet = ?, idServ = ? "
+                + "WHERE idEnv = ?";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -134,9 +180,8 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
 
     public List<Environnement> findByProjet(UUID idProjet) {
         List<Environnement> environnements = new ArrayList<>();
-        String sql = "SELECT e.*, s.adressIP, s.os FROM Environnement e " +
-                     "LEFT JOIN Serveur s ON e.idServ = s.idServ " +
-                     "WHERE e.idProjet = ? ORDER BY e.typeEnv ASC, e.nomBaseDeDonnees ASC";
+        String sql = BASE_SELECT + "WHERE e.idProjet = ? "
+                + "ORDER BY FIELD(e.typeEnv, 'PRODUCTION', 'STAGING', 'DEVELOPPEMENT', 'LOCAL'), e.nomBaseDeDonnees ASC";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -163,6 +208,12 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         environnement.setUrlBack(rs.getString("urlBack"));
         environnement.setNotes(rs.getString("notes"));
         environnement.setIdProjet(UUID.fromString(rs.getString("idProjet")));
+
+        try {
+            environnement.setNomProjet(rs.getString("nomProjet"));
+        } catch (SQLException e) {
+            // Champ absent du ResultSet
+        }
 
         String idServ = rs.getString("idServ");
         if (idServ != null) {

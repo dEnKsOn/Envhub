@@ -16,6 +16,7 @@ public class Environnement {
 	private String notes;
 	private UUID idProjet;
 	private UUID idServ;
+	private String nomProjet;
 	public Serveur serveur;
 
 	public Environnement(){
@@ -110,6 +111,14 @@ public class Environnement {
 
 	public void setIdServ(UUID idServ) {
 		this.idServ = idServ;
+	}
+
+	public String getNomProjet() {
+		return nomProjet;
+	}
+
+	public void setNomProjet(String nomProjet) {
+		this.nomProjet = nomProjet;
 	}
 
 	public Serveur getServeur() {
