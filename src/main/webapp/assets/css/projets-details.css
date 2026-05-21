@@ -1,0 +1,476 @@
+/**
+ * projets-details.css — Détails projet + équipe
+ * Réutilise projets.css (tableaux, badges, modales, formulaires)
+ * Styles spécifiques scopés sous .projet-details-page
+ */
+
+@import url('projets.css');
+
+/* =========================================
+   1. VARIABLES LOCALES (aligné projets.css)
+   ========================================= */
+.projet-details-page {
+  --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
+  --chef-bg: rgba(245, 158, 11, 0.12);
+  --chef-border: rgba(245, 158, 11, 0.35);
+  --chef-text: #a16207;
+}
+
+/* =========================================
+   2. UTILITAIRES PAGE (complète layout.css)
+   ========================================= */
+.projet-details-page .stack-xs { gap: 0.5rem; }
+.projet-details-page .mt-1 { margin-top: 0.25rem; }
+.projet-details-page .mt-4 { margin-top: 1.5rem; }
+.projet-details-page .wrap { flex-wrap: wrap; }
+.projet-details-page .gap-4 { gap: 1rem; }
+
+@media (max-width: 640px) {
+  .projet-details-page .hide-mobile { display: none; }
+}
+
+/* =========================================
+   3. GRILLE PRINCIPALE (70 / 30)
+   ========================================= */
+.projet-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .projet-details-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 2rem;
+  }
+
+  .projet-details-sidebar {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.projet-details-main,
+.projet-details-sidebar {
+  min-width: 0;
+}
+
+/* =========================================
+   4. BARRE D'OUTILS & RETOUR
+   ========================================= */
+.projet-details-toolbar {
+  margin-bottom: 0.25rem;
+}
+
+.projet-details-page .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.projet-details-page .back-link:hover {
+  color: var(--accent);
+}
+
+.projet-details-page .back-link i,
+.projet-details-page .back-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* =========================================
+   5. EN-TÊTE PROJET
+   ========================================= */
+.projet-details-page .projet-header-card {
+  padding: 1.5rem;
+}
+
+.projet-header-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.projet-header-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.projet-header-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.projet-details-page .projet-title {
+  margin: 0;
+  font-family: 'Inknut Antiqua', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.projet-description {
+  color: var(--text-muted);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.projet-dates {
+  gap: 1rem;
+}
+
+.projet-date-item {
+  padding: 0.75rem 1rem;
+  background: var(--bg-input, #FAFAF9);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+/* Progression : cohérent avec la liste projets */
+.projet-details-page .progress-wrapper {
+  min-width: 0;
+  max-width: 420px;
+}
+
+.projet-details-page .progress-container {
+  margin-top: 0.25rem;
+}
+
+/* =========================================
+   6. SECTION ENVIRONNEMENTS
+   ========================================= */
+.projet-details-page .card.stack-sm {
+  padding: 1.5rem;
+  gap: 1.25rem;
+}
+
+.projet-details-page .env-table-wrapper {
+  overflow-x: auto;
+}
+
+.projet-details-page .env-table td {
+  vertical-align: middle;
+}
+
+/* Badges type d'environnement */
+.env-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.env-badge-LOCAL {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.env-badge-DEVELOPPEMENT {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.env-badge-STAGING {
+  background: #fef9c3;
+  color: #a16207;
+  border-color: #fde047;
+}
+
+.env-badge-PRODUCTION {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+  box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.15);
+}
+
+/* Serveur hôte */
+.env-server-host {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.env-server-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.env-server-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Points d'accès (boutons compacts) */
+.env-access-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.env-access-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  color: var(--accent);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.env-access-btn i,
+.env-access-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.env-access-btn-front:not(.is-disabled):hover {
+  background: #e0f2fe;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+
+.env-access-btn-back:not(.is-disabled):hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: var(--text-main);
+}
+
+.env-access-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #f8fafc;
+  color: var(--text-muted);
+}
+
+/* Base de données */
+.env-db-name {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+  background: #f1f5f9;
+  color: var(--accent);
+  border: 1px solid var(--border-light);
+}
+
+/* =========================================
+   7. PANNEAU ÉQUIPE
+   ========================================= */
+.projet-details-page .equipe-card {
+  padding: 1.5rem;
+  gap: 1.25rem;
+}
+
+.equipe-section + .equipe-section {
+  margin-top: 0.5rem;
+}
+
+.equipe-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.equipe-section-label i,
+.equipe-section-label svg {
+  width: 16px;
+  height: 16px;
+  color: var(--primary);
+}
+
+.equipe-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.equipe-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-tech);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.equipe-member:hover {
+  background: rgba(241, 245, 249, 0.6);
+}
+
+.equipe-member-chef {
+  border-color: var(--chef-border);
+  background: linear-gradient(
+    135deg,
+    var(--chef-bg) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+}
+
+.equipe-member-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.equipe-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.equipe-avatar i,
+.equipe-avatar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.equipe-avatar-chef {
+  background: var(--chef-bg);
+  color: var(--chef-text);
+}
+
+.equipe-member-name {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge-chef {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--chef-bg);
+  color: var(--chef-text);
+  border: 1px solid var(--chef-border);
+}
+
+.equipe-empty {
+  padding: 0.5rem 0.75rem;
+  list-style: none;
+}
+
+/* Boutons compacts (sidebar) */
+.projet-details-page .btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.projet-details-page .btn-primary.btn-sm i,
+.projet-details-page .btn-primary.btn-sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+.projet-details-page .btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* =========================================
+   8. MODALES (surcharges largeur)
+   ========================================= */
+.projet-details-page #edit-projet-modal .modal-card,
+.projet-details-page #add-member-modal .modal-card {
+  width: min(650px, 95vw);
+}
+
+.projet-details-page #remove-member-modal .modal-card {
+  width: min(480px, 95vw);
+}
+
+/* =========================================
+   9. RESPONSIVE
+   ========================================= */
+@media (max-width: 1023px) {
+  .projet-details-page .projet-header-card,
+  .projet-details-page .card.stack-sm,
+  .projet-details-page .equipe-card {
+    padding: 1.25rem;
+  }
+
+  .projet-details-page .projet-title {
+    font-size: 1.25rem;
+  }
+
+  .projet-details-page .data-table th,
+  .projet-details-page .data-table td {
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .projet-details-page .projet-dates.grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .projet-details-page .equipe-member {
+    padding: 0.625rem;
+  }
+}
