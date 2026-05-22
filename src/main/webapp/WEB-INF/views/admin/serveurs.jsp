@@ -26,6 +26,14 @@
     </c:if>
   </form>
 
+  <div id="no-results-message" class="alert alert-danger search-result-message" style="display: none; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+    <div>
+      <strong>Serveur introuvable.</strong>
+      <div>Aucun résultat pour "<span id="no-results-query"></span>".</div>
+    </div>
+    <button type="button" class="btn btn-primary open-serveur-modal">Ajouter un serveur</button>
+  </div>
+
   <c:if test="${not empty param.success}">
     <div class="alert alert-success">L'opération a été réalisée avec succès.</div>
   </c:if>
