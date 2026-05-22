@@ -15,7 +15,6 @@ import java.util.UUID;
 @WebServlet("/admin/serveurs")
 public class ServeursServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-
     private ServeurDAO serveurDAO;
 
     @Override
@@ -31,20 +30,11 @@ public class ServeursServlet extends HttpServlet {
         }
 
         String searchQuery = request.getParameter("search");
-        if (searchQuery != null) {
-            searchQuery = searchQuery.trim();
-        }
-
-        if (searchQuery != null && !searchQuery.isEmpty()) {
-            request.setAttribute("searchQuery", searchQuery);
-            java.util.List<Serveur> resultats = serveurDAO.search(searchQuery);
-            if (resultats == null) {
-                resultats = java.util.Collections.emptyList();
-            }
-            request.setAttribute("listeServeurs", resultats);
-            if (resultats.isEmpty()) {
-                request.setAttribute("searchNotFound", true);
-            }
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            request.setAttribute("searchQuery", searchQuery.trim());
+            java.util.List<Serveur> resultats = serveurDAO.search(searchQuery.trim());
+            request.setAttribute("listeServeurs", resultats != null ? resultats : java.util.Collections.emptyList());
+            if (resultats == null || resultats.isEmpty()) request.setAttribute("searchNotFound", true);
         } else {
             request.setAttribute("listeServeurs", serveurDAO.findAll());
         }
@@ -68,7 +58,6 @@ public class ServeursServlet extends HttpServlet {
             return;
         }
 
-        // Récupération des paramètres du formulaire
         String adressIP = request.getParameter("adressIP");
         String os = request.getParameter("os");
 
@@ -82,14 +71,9 @@ public class ServeursServlet extends HttpServlet {
         String ip = adressIP.trim();
         UUID uuidToExclude = null;
         if ("update".equals(action) && serveurId != null && !serveurId.trim().isEmpty()) {
-            try {
-                uuidToExclude = UUID.fromString(serveurId);
-            } catch (IllegalArgumentException e) {
-                // Sera géré dans le bloc d'update
-            }
+            try { uuidToExclude = UUID.fromString(serveurId); } catch (Exception e) {}
         }
 
-        // Règle métier : Une adresse IP ne peut pas être dupliquée
         if (serveurDAO.isIpExists(ip, uuidToExclude)) {
             request.setAttribute("erreur", "Cette adresse IP est déjà attribuée à un autre serveur.");
             loadData(request);
@@ -101,69 +85,53 @@ public class ServeursServlet extends HttpServlet {
         serveur.setAdressIP(ip);
         serveur.setOs(os.trim());
 
-        // MODE UPDATE
-        if ("update".equals(action) && serveurId != null && !serveurId.trim().isEmpty()) {
+        // Nouvelles données matérielles
+        String fournisseur = request.getParameter("fournisseur");
+        if (fournisseur != null && !fournisseur.trim().isEmpty()) serveur.setFournisseur(fournisseur.trim());
+
+        String cpuCores = request.getParameter("cpuCores");
+        if (cpuCores != null && !cpuCores.trim().isEmpty()) {
+            try { serveur.setCpuCores(Integer.parseInt(cpuCores.trim())); } catch (NumberFormatException e) {}
+        }
+
+        String ramGb = request.getParameter("ramGb");
+        if (ramGb != null && !ramGb.trim().isEmpty()) {
+            try { serveur.setRamGb(Integer.parseInt(ramGb.trim())); } catch (NumberFormatException e) {}
+        }
+
+        if ("update".equals(action)) {
             try {
                 serveur.setIdServ(UUID.fromString(serveurId));
-            } catch (IllegalArgumentException e) {
-                request.setAttribute("erreur", "Identifiant de serveur invalide.");
-                loadData(request);
-                request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
+                if (serveurDAO.update(serveur)) {
+                    response.sendRedirect(request.getContextPath() + "/admin/serveurs?success=true");
+                    return;
+                }
+            } catch (Exception e) {}
+            request.setAttribute("erreur", "Impossible de mettre à jour le serveur.");
+        } else {
+            if (serveurDAO.save(serveur)) {
+                response.sendRedirect(request.getContextPath() + "/admin/serveurs?success=true");
                 return;
             }
-
-            boolean updated = serveurDAO.update(serveur);
-            if (updated) {
-                response.sendRedirect(request.getContextPath() + "/admin/serveurs?success=true");
-            } else {
-                request.setAttribute("erreur", "Impossible de mettre à jour le serveur.");
-                loadData(request);
-                request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
-            }
-            return;
+            request.setAttribute("erreur", "Impossible d'enregistrer le serveur.");
         }
 
-        // MODE CREATE
-        if ("create".equals(action) || action == null) {
-            boolean saved = serveurDAO.save(serveur);
-            if (saved) {
-                response.sendRedirect(request.getContextPath() + "/admin/serveurs?success=true");
-            } else {
-                request.setAttribute("erreur", "Impossible d'enregistrer le serveur.");
-                loadData(request);
-                request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
-            }
-            return;
-        }
-
-        request.setAttribute("erreur", "Action non reconnue.");
         loadData(request);
         request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
     }
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response, String serveurId) throws IOException, ServletException {
-        if (serveurId == null || serveurId.trim().isEmpty()) {
-            request.setAttribute("erreur", "Serveur introuvable pour suppression.");
-            loadData(request);
-            request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
-            return;
-        }
-
         try {
-            UUID uuid = UUID.fromString(serveurId);
-            boolean deleted = serveurDAO.delete(uuid);
-            if (deleted) {
+            if (serveurDAO.delete(UUID.fromString(serveurId))) {
                 response.sendRedirect(request.getContextPath() + "/admin/serveurs?success=true");
-            } else {
-                request.setAttribute("erreur", "Impossible de supprimer le serveur. Des environnements y sont probablement rattachés (Contrainte de clé étrangère).");
-                loadData(request);
-                request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
+                return;
             }
-        } catch (IllegalArgumentException e) {
-            request.setAttribute("erreur", "Identifiant de serveur invalide pour suppression.");
-            loadData(request);
-            request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
+            request.setAttribute("erreur", "Impossible de supprimer le serveur (Contrainte de clé étrangère).");
+        } catch (Exception e) {
+            request.setAttribute("erreur", "Serveur introuvable ou identifiant invalide.");
         }
+        loadData(request);
+        request.getRequestDispatcher("/admin/serveurs.jsp").forward(request, response);
     }
 
     private boolean isAuthenticated(HttpServletRequest request) {
