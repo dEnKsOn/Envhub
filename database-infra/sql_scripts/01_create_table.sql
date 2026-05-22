@@ -74,11 +74,13 @@ CREATE TABLE `Projet`
 CREATE TABLE `Serveur`
 (
     `idServ` CHAR(36) NOT NULL,
-    `adressIP` VARCHAR(50) NOT NULL,
+    `adressIP` VARCHAR(50) NOT NULL UNIQUE, 
     `os` VARCHAR(50) NOT NULL,
+    `cpu_cores` INT NULL,                   
+    `ram_gb` INT NULL,                      
+    `fournisseur` VARCHAR(100) NULL,        
     CONSTRAINT `PK_Serveur` PRIMARY KEY (`idServ`)
 );
-
 CREATE TABLE `Environnement`
 (
     `idEnv` CHAR(36) NOT NULL,
@@ -116,6 +118,21 @@ CREATE TABLE `VersionTechno`
     `idTechno` CHAR(36) NOT NULL,
     `version` VARCHAR(50) NOT NULL,
     CONSTRAINT `PK_VersionTechno` PRIMARY KEY (`idEnv`, `idTechno`)
+);
+
+CREATE TABLE `DemandeProjet`
+(
+    `idDemande` CHAR(36) NOT NULL,
+    `nomClient` VARCHAR(100) NOT NULL,
+    `emailClient` VARCHAR(100) NOT NULL,
+    `entrepriseClient` VARCHAR(100) NULL,
+    `titreProjet` VARCHAR(150) NOT NULL,
+    `descriptionBesoin` TEXT NOT NULL,
+    `budgetEstime` DECIMAL(10,2) NULL, /* Optionnel : Utile pour évaluer la faisabilité */
+    `dateSoumission` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `statutDemande` ENUM('EN_ATTENTE', 'ACCEPTE', 'REJETE') NOT NULL DEFAULT 'EN_ATTENTE',
+    `dateTraitement` DATETIME NULL, /* Pour tracer quand l'Admin a pris la décision */
+    CONSTRAINT `PK_DemandeProjet` PRIMARY KEY (`idDemande`)
 );
 
 

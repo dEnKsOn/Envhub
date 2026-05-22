@@ -1,6 +1,6 @@
 /* ---------------------------------------------------- */
 /* Projet      : EnvHub - Script des Triggers           */
-/* Auteur      : Kossi Jubilee DENOU                   */
+/* Auteur      : Kossi Jubilee DENOU                    */
 /* SGBD        : MySQL (Docker Compatible)              */
 /* ---------------------------------------------------- */
 
@@ -85,12 +85,30 @@ BEGIN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = 'Règle métier bloquante : Ce projet possède déjà un Chef de Projet. Un seul est autorisé.';
         END IF;
-        
     END IF;
 END$$
 
+-- Sécurité Infrastructure : Pas de production sur un serveur avec moins de 4Go de RAM
+CREATE TRIGGER trg_check_capacite_serveur_prod
+BEFORE INSERT ON `Environnement`
+FOR EACH ROW
+BEGIN
+    DECLARE v_ram INT;
+    
+    -- On ne vérifie que si un serveur est défini ET que c'est de la production
+    IF NEW.idServ IS NOT NULL AND NEW.typeEnv = 'PRODUCTION' THEN
+        SELECT ram_gb INTO v_ram FROM `Serveur` WHERE idServ = NEW.idServ;
+        
+        -- Si la RAM est connue et qu'elle est strictement inférieure à 4
+        IF v_ram IS NOT NULL AND v_ram < 4 THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erreur d''infrastructure : Impossible d''affecter un environnement de PRODUCTION sur un serveur possédant moins de 4 Go de RAM.';
+        END IF;
+    END IF;
+END$$
+
+
 /* ==================================================== */
-/* 2. AUTOMATISATION (CYCLE DE VIE)                    */
+/* 2. AUTOMATISATION (CYCLE DE VIE)                     */
 /* ==================================================== */
 
 -- Livraison automatique à 100% d'avancement
@@ -114,6 +132,18 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Modification impossible : Le projet est clôturé (Livré ou Annulé).';
     END IF;
 END$$
+
+-- Suivi Commercial : Mettre à jour automatiquement la date de traitement d'une demande
+CREATE TRIGGER trg_auto_date_traitement_demande
+BEFORE UPDATE ON `DemandeProjet`
+FOR EACH ROW
+BEGIN
+    -- Si le statut change et n'est plus "EN_ATTENTE"
+    IF NEW.statutDemande != OLD.statutDemande AND NEW.statutDemande IN ('ACCEPTE', 'REJETE') THEN
+        SET NEW.dateTraitement = CURRENT_TIMESTAMP;
+    END IF;
+END$$
+
 
 /* ==================================================== */
 /* 3. SÉCURITÉ ET AUDIT                                 */
@@ -140,8 +170,23 @@ BEGIN
     END IF;
 END$$
 
+-- Intégrité Commerciale : Empêcher la modification d'une demande clôturée
+CREATE TRIGGER trg_bloquer_modif_demande_cloturee
+BEFORE UPDATE ON `DemandeProjet`
+FOR EACH ROW
+BEGIN
+    -- Si l'ancienne demande était déjà traitée
+    IF OLD.statutDemande IN ('ACCEPTE', 'REJETE') THEN
+        -- Autoriser uniquement le changement de statut (erreur de clic), mais interdire de modifier les infos
+        IF OLD.descriptionBesoin != NEW.descriptionBesoin OR OLD.titreProjet != NEW.titreProjet OR OLD.budgetEstime != NEW.budgetEstime THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sécurité : Impossible de modifier les détails d''une demande qui a déjà été traitée (Acceptée ou Rejetée).';
+        END IF;
+    END IF;
+END$$
+
+
 /* ==================================================== */
-/* 4. VALIDATION DE FORMAT                             */
+/* 4. VALIDATION DE FORMAT                              */
 /* ==================================================== */
 
 -- Validation du format des URLs
