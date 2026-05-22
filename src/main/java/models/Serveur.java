@@ -12,6 +12,9 @@ public class Serveur {
 	private String adressIP;
 	private String os;
 	private int nombreEnvironnements;
+	private Integer cpuCores;
+	private Integer ramGb;
+	private String fournisseur;
 
 	public Serveur(){
 
@@ -47,6 +50,30 @@ public class Serveur {
 
 	public void setNombreEnvironnements(int nombreEnvironnements) {
 		this.nombreEnvironnements = nombreEnvironnements;
+	}
+
+	public Integer getCpuCores() {
+		return cpuCores;
+	}
+
+	public void setCpuCores(Integer cpuCores) {
+		this.cpuCores = cpuCores;
+	}
+
+	public Integer getRamGb() {
+		return ramGb;
+	}
+
+	public void setRamGb(Integer ramGb) {
+		this.ramGb = ramGb;
+	}
+
+	public String getFournisseur() {
+		return fournisseur;
+	}
+
+	public void setFournisseur(String fournisseur) {
+		this.fournisseur = fournisseur;
 	}
 
 	public void finalize() throws Throwable {
