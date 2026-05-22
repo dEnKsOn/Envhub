@@ -1,4 +1,55 @@
-document.addEventListener('DOMContentLoaded', function() {
+// --- Initialisation locale (s'exécute à chaque chargement) ---
+(function initServeursLocal() {
+    // 1. Filtrage à la volée
+    const searchInput = document.getElementById('search-input');
+    const searchForm = document.getElementById('search-form');
+    const tableBody = document.getElementById('serveurs-table-body');
+    const noResultsMessage = document.getElementById('no-results-message');
+    const noResultsQuery = document.getElementById('no-results-query');
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+            let hasVisibleRows = false;
+
+            rows.forEach(row => {
+                if (row.cells.length > 1) {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        row.style.display = '';
+                        hasVisibleRows = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            // 2. Gestion de l'Empty State (Message introuvable)
+            if (noResultsMessage && noResultsQuery) {
+                if (!hasVisibleRows && term.trim() !== '') {
+                    noResultsQuery.textContent = e.target.value;
+                    noResultsMessage.style.display = 'flex';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
+    }
+
+    // --- Fin recherche instantanée ---
+})();
+
+// Gestion des événements via délégation pour supporter le chargement AJAX
+if (!window.serveursJsInitialized) {
+    window.serveursJsInitialized = true;
+
     function openModal(modal) {
         if (modal) {
             modal.classList.add('is-visible');
@@ -32,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener('click', function(e) {
-        // Bouton Ajouter
+        // 4. Connexion du bouton "Ajouter" (y compris le bouton de l'Empty State)
         if (e.target.closest('#btn-add-serveur') || e.target.closest('.open-serveur-modal')) {
             e.preventDefault();
             openServeurModal('create');
@@ -67,6 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal(document.getElementById('delete-serveur-modal'));
         }
     });
+}
 
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-});
+// S'assurer que les icônes sont rendues immédiatement (compatible AJAX)
+if (typeof window.refreshLucideIcons === 'function') {
+    window.refreshLucideIcons();
+} else if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+}
