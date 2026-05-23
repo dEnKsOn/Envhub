@@ -54,6 +54,7 @@ CREATE TABLE `Client`
     `nomClient` VARCHAR(100) NOT NULL,
     `prenomClient` VARCHAR(100) NULL, /* Ajout de l'attribut manquant */
     `entrepriseClient` VARCHAR(100) NOT NULL,
+    `emailClient` VARCHAR(100) NULL, /* Ajout de l'attribut manquant */
     CONSTRAINT `PK_Client` PRIMARY KEY (`idClient`)
 );
 
