@@ -20,6 +20,7 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
         client.setNomClient(rs.getString("nomClient"));
         client.setPrenomClient(rs.getString("prenomClient"));
         client.setEntrepriseClient(rs.getString("entrepriseClient"));
+        client.setEmailClient(rs.getString("emailClient"));
         
         try {
             client.setNombreProjets(rs.getInt("nombreProjets"));
@@ -31,11 +32,11 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
 
     @Override
     public Client findById(UUID id) {
-        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, COUNT(p.idProjet) as nombreProjets " +
+        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient, COUNT(p.idProjet) as nombreProjets " +
                      "FROM Client c " +
                      "LEFT JOIN Projet p ON c.idClient = p.idClient " +
                      "WHERE c.idClient = ? " +
-                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient";
+                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -57,10 +58,10 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
     @Override
     public List<Client> findAll() {
         List<Client> clients = new ArrayList<>();
-        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, COUNT(p.idProjet) as nombreProjets " +
+        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient, COUNT(p.idProjet) as nombreProjets " +
                      "FROM Client c " +
                      "LEFT JOIN Projet p ON c.idClient = p.idClient " +
-                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient " +
+                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient " +
                      "ORDER BY c.entrepriseClient ASC, c.nomClient ASC";
 
         try (Connection conn = DbConnection.getConnection();
@@ -79,13 +80,14 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
 
     public List<Client> search(String query) {
         List<Client> clients = new ArrayList<>();
-        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, COUNT(p.idProjet) as nombreProjets " +
+        String sql = "SELECT c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient, COUNT(p.idProjet) as nombreProjets " +
                      "FROM Client c " +
                      "LEFT JOIN Projet p ON c.idClient = p.idClient " +
                      "WHERE LOWER(c.nomClient) LIKE ? " +
                      "OR LOWER(c.prenomClient) LIKE ? " +
                      "OR LOWER(c.entrepriseClient) LIKE ? " +
-                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient " +
+                     "OR LOWER(c.emailClient) LIKE ? " +
+                     "GROUP BY c.idClient, c.nomClient, c.prenomClient, c.entrepriseClient, c.emailClient " +
                      "ORDER BY c.entrepriseClient ASC, c.nomClient ASC";
 
         String searchTerm = "%" + query.toLowerCase() + "%";
@@ -95,6 +97,7 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
             stmt.setString(1, searchTerm);
             stmt.setString(2, searchTerm);
             stmt.setString(3, searchTerm);
+            stmt.setString(4, searchTerm);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -110,7 +113,7 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
 
     @Override
     public boolean save(Client entity) {
-        String sql = "INSERT INTO Client (idClient, nomClient, prenomClient, entrepriseClient) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Client (idClient, nomClient, prenomClient, entrepriseClient, emailClient) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -129,6 +132,13 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
             }
 
             stmt.setString(4, entity.getEntrepriseClient());
+
+            if (entity.getEmailClient() != null && !entity.getEmailClient().trim().isEmpty()) {
+                stmt.setString(5, entity.getEmailClient());
+            } else {
+                stmt.setNull(5, Types.VARCHAR);
+            }
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'enregistrement du client : " + e.getMessage());
@@ -139,7 +149,7 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
 
     @Override
     public boolean update(Client entity) {
-        String sql = "UPDATE Client SET nomClient = ?, prenomClient = ?, entrepriseClient = ? WHERE idClient = ?";
+        String sql = "UPDATE Client SET nomClient = ?, prenomClient = ?, entrepriseClient = ?, emailClient = ? WHERE idClient = ?";
 
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -153,7 +163,14 @@ public class ClientDAO implements IGenericDAO<Client, UUID> {
             }
 
             stmt.setString(3, entity.getEntrepriseClient());
-            stmt.setString(4, entity.getIdClient().toString());
+
+            if (entity.getEmailClient() != null && !entity.getEmailClient().trim().isEmpty()) {
+                stmt.setString(4, entity.getEmailClient());
+            } else {
+                stmt.setNull(4, Types.VARCHAR);
+            }
+
+            stmt.setString(5, entity.getIdClient().toString());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erreur lors de la mise à jour du client : " + e.getMessage());

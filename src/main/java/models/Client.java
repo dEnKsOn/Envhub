@@ -7,6 +7,7 @@ public class Client {
 	private String nomClient;
 	private String prenomClient;
 	private String entrepriseClient;
+	private String emailClient;
 	
 	// Champ ajouté pour l'affichage (nombre de projets associés)
 	private int nombreProjets;
@@ -45,6 +46,14 @@ public class Client {
 
 	public void setEntrepriseClient(String entrepriseClient) {
 		this.entrepriseClient = entrepriseClient;
+	}
+
+	public String getEmailClient() {
+		return emailClient;
+	}
+
+	public void setEmailClient(String emailClient) {
+		this.emailClient = emailClient;
 	}
 
 	public int getNombreProjets() {

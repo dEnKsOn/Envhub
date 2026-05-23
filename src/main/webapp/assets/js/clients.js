@@ -77,6 +77,7 @@ if (!window.clientsJsInitialized) {
     const entrepriseInput = document.getElementById('entreprise');
     const nomInput = document.getElementById('nom');
     const prenomInput = document.getElementById('prenom');
+    const emailClientInput = document.getElementById('emailClient');
 
     if (mode === 'edit') {
       if (modalTitle) modalTitle.textContent = 'Modifier le client';
@@ -91,6 +92,7 @@ if (!window.clientsJsInitialized) {
       if (entrepriseInput) entrepriseInput.value = client.entreprise || '';
       if (nomInput) nomInput.value = client.nom || '';
       if (prenomInput) prenomInput.value = client.prenom && client.prenom !== 'undefined' ? client.prenom : '';
+      if (emailClientInput) emailClientInput.value = client.emailClient && client.emailClient !== 'undefined' ? client.emailClient : '';
     } else {
       if (modalTitle) modalTitle.textContent = 'Ajouter un client';
       if (modalSubtitle) modalSubtitle.textContent = 'Veuillez renseigner les informations du client.';
@@ -104,6 +106,7 @@ if (!window.clientsJsInitialized) {
       if (entrepriseInput) entrepriseInput.value = '';
       if (nomInput) nomInput.value = '';
       if (prenomInput) prenomInput.value = '';
+      if (emailClientInput) emailClientInput.value = '';
     }
   }
 
@@ -133,7 +136,8 @@ if (!window.clientsJsInitialized) {
         id: btnEdit.dataset.clientId,
         entreprise: btnEdit.dataset.entreprise,
         nom: btnEdit.dataset.nom,
-        prenom: btnEdit.dataset.prenom
+        prenom: btnEdit.dataset.prenom,
+        emailClient: btnEdit.dataset.emailClient
       });
       return;
     }
