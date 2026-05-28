@@ -34,6 +34,11 @@
     <div class="nav-group mt-4">
       <p class="nav-group-label">- Administration -</p>
       
+      <a href="${pageContext.request.contextPath}/admin/demandes" class="nav-item ${pageContext.request.requestURI.contains('demandes') ? 'is-active' : ''}">
+        <i data-lucide="inbox"></i>
+        <span>Demandes clients</span>
+      </a>
+      
       <a href="${pageContext.request.contextPath}/admin/utilisateurs" class="nav-item ${pageContext.request.requestURI.contains('utilisateurs') ? 'is-active' : ''}">
         <i data-lucide="users"></i>
         <span>Utilisateurs</span>
