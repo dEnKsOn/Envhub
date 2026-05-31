@@ -1,15 +1,16 @@
 /**
  * environnements.css — Cohérence Visuelle EnvHub
- * Aligné sur clients.css et le layout global
+ * Strictement aligné sur dashboard-stats.css
  */
 
 /* =========================================
-   1. VARIABLES DE PORTÉE LOCALE (Sync Clients/Login)
+   1. VARIABLES DE PORTÉE LOCALE
    ========================================= */
    :root {
-    --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
-    --focus-glow: 0 0 0 3px rgba(100, 116, 139, 0.15);
-    --bg-input: #FAFAF9;
+    --shadow-base: 0 2px 4px rgba(12, 22, 37, 0.02), 0 4px 6px rgba(12, 22, 37, 0.02);
+    --shadow-hover: 0 12px 20px -5px rgba(12, 22, 37, 0.08), 0 8px 10px -6px rgba(12, 22, 37, 0.04);
+    --focus-ring: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    --bg-input: #F8FAFC;
   }
   
   /* =========================================
@@ -20,35 +21,42 @@
   }
   
   .section-title {
-    font-family: var(--font-heading, 'Inknut Antiqua', serif);
+    font-family: 'Inknut Antiqua', serif;
     font-size: 1.75rem;
-    color: var(--text-main);
+    font-weight: 800;
+    color: #0F172A;
     margin: 0 0 4px 0;
+    letter-spacing: -0.02em;
   }
   
   .text-muted {
-    color: var(--text-muted, #64748B);
+    color: #64748B;
     font-size: 0.95rem;
     margin: 0;
   }
   
   /* =========================================
-     3. PANNEAU DE FILTRES (Basé sur .search-form de clients.css)
+     3. PANNEAU DE FILTRES (Style Search Form)
      ========================================= */
   .filters-panel {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     background: var(--bg-surface, #FFFFFF);
-    padding: 16px;
-    border-radius: var(--radius-md, 8px);
+    padding: 12px 16px;
+    border-radius: 16px;
     border: 1px solid var(--border-light, #E2E8F0);
-    box-shadow: var(--shadow-tech);
+    box-shadow: var(--shadow-base);
     margin-bottom: 24px;
     align-items: center;
     flex-wrap: wrap;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  /* Identique à .input-with-icon de clients.css */
+  .filters-panel:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: #CBD5E1;
+  }
+  
   .filter-group {
     position: relative;
     display: flex;
@@ -60,70 +68,74 @@
   .filter-group i,
   .filter-group svg {
     position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 16px;
     color: #94A3B8;
     width: 18px;
     height: 18px;
     pointer-events: none;
   }
   
-  /* Identique à .form-control de clients.css */
   .filter-select {
     width: 100%;
     background-color: var(--bg-input);
-    border: 1.5px solid var(--border-light, #E2E8F0);
+    border: 1px solid transparent;
     border-radius: 8px;
-    padding: 12px 16px 12px 42px; /* 42px pour laisser la place à l'icône */
+    padding: 10px 16px 10px 44px;
     font-size: 0.95rem;
     transition: all 0.2s ease;
-    font-family: 'Satoshi', sans-serif;
-    color: var(--text-main, #0C1625);
-    appearance: none;
+    color: #0F172A;
+    appearance: auto;
     cursor: pointer;
   }
   
   .filter-select:focus {
-    border-color: var(--primary, #324155);
+    border-color: var(--primary, #3B82F6);
     background-color: var(--bg-surface, #FFFFFF);
-    box-shadow: var(--focus-glow);
+    box-shadow: var(--focus-ring);
+    outline: none;
   }
   
   #btn-reset-filters {
-    padding: 12px 16px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 0.95rem;
-    font-weight: 500;
-    font-family: 'Satoshi', sans-serif;
-    background: var(--bg-surface, #FFFFFF);
-    border: 1.5px solid var(--border-light, #E2E8F0);
-    color: var(--text-main);
+    font-weight: 600;
+    background: #F1F5F9;
+    border: none;
+    color: #64748B;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
   }
   
   #btn-reset-filters:hover {
-    background: rgba(241, 245, 249, 0.5);
-    border-color: #CBD5E1;
+    background: #E2E8F0;
+    color: #0F172A;
   }
   
   /* =========================================
-     4. TABLEAU (Copie exacte de clients.css)
+     4. TABLEAU DES ENVIRONNEMENTS (Style Card)
      ========================================= */
   .table-card {
     margin-bottom: 32px;
+    background: var(--bg-surface, #FFFFFF);
+    border-radius: 16px;
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: var(--shadow-base);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .table-card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: #CBD5E1;
   }
   
   .table-responsive {
-    background: var(--bg-surface, #FFFFFF);
-    border-radius: var(--radius-md, 8px);
-    border: 1px solid var(--border-light, #E2E8F0);
-    box-shadow: var(--shadow-tech);
-    overflow: hidden;
+    width: 100%;
+    overflow-x: auto;
   }
   
   .data-table {
@@ -138,21 +150,25 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-muted, #64748B);
-    border-bottom: 1.5px solid var(--border-light, #E2E8F0);
+    color: #64748B;
+    border-bottom: 1px solid #E2E8F0;
     text-align: left;
   }
   
   .data-table td {
     padding: 16px 24px;
     font-size: 0.9rem;
-    color: var(--text-main, #0C1625);
-    border-bottom: 1px solid var(--border-light, #E2E8F0);
+    color: #0F172A;
+    border-bottom: 1px solid #F1F5F9;
     vertical-align: middle;
   }
   
+  .data-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  
   .data-table tbody tr:hover {
-    background-color: rgba(241, 245, 249, 0.5);
+    background-color: #F8FAFC;
   }
   
   .data-table tr:last-child td {
@@ -160,9 +176,8 @@
   }
   
   /* =========================================
-     5. BADGES ET ÉLÉMENTS INTERNES (Style Environnements)
+     5. BADGES, LIENS ET COMPOSANTS INTERNES
      ========================================= */
-  /* Aligné sur le design "badge-outline" de clients.css */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -173,105 +188,108 @@
     letter-spacing: 0.02em;
   }
   
-  .badge-prod { background: #F0FDF4; color: #166534; border: 1px solid rgba(22, 101, 52, 0.2); }
-  .badge-staging { background: #FFF7ED; color: #9A3412; border: 1px solid rgba(154, 52, 18, 0.2); }
-  .badge-dev { background: #F0F9FF; color: #0369A1; border: 1px solid rgba(3, 105, 161, 0.2); }
-  .badge-local { background: #F8FAFC; color: #475569; border: 1px solid rgba(71, 85, 105, 0.2); }
+  .badge-prod { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+  .badge-staging { background: #FEF3C7; color: #9A3412; border: 1px solid #FDE68A; }
+  .badge-dev { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+  .badge-local { background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; }
   
   .project-link {
-    color: var(--text-main);
+    color: #0F172A;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s ease;
   }
   
   .project-link:hover {
-    color: var(--primary, #324155);
-    text-decoration: underline;
+    color: var(--primary, #3B82F6);
   }
   
-  /* Composants techniques */
   .tech-info, .trace-info { display: flex; flex-direction: column; gap: 4px; }
   
   .font-mono {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: ui-monospace, 'Cascadia Code', monospace;
     font-size: 0.85rem;
-    color: var(--text-main);
+    color: #0F172A;
     background: var(--bg-input);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid var(--border-light);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
     width: fit-content;
   }
   
-  .db-name { font-size: 0.9rem; font-weight: 500; }
+  .db-name { font-size: 0.85rem; font-weight: 600; color: #334155; }
   .text-xs { font-size: 0.75rem; }
   
-  .urls-mini { display: flex; gap: 6px; }
+  .urls-mini { display: flex; gap: 6px; flex-wrap: wrap; }
   .urls-mini span {
     font-size: 0.7rem;
-    background: #FAFAFA;
+    background: #F8FAFC;
     padding: 2px 8px;
-    border-radius: 4px;
-    color: var(--text-muted);
-    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    color: #64748B;
+    border: 1px solid #E2E8F0;
     font-weight: 600;
   }
   
-  .trace-author { font-weight: 600; font-size: 0.9rem; color: var(--text-main); text-transform: capitalize; }
-  .trace-date { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-muted); }
+  .trace-author { font-weight: 600; font-size: 0.9rem; color: #0F172A; text-transform: capitalize; }
+  .trace-date { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: #64748B; }
   .trace-date i { width: 14px; height: 14px; }
   
-  /* Boutons Actions (Style icon-button standardisé) */
+  /* Boutons Actions (Style Dashboard) */
   .actions-flex { display: flex; justify-content: flex-end; gap: 8px; }
+  
   .btn-icon {
-    background: var(--bg-surface);
-    border: 1.5px solid var(--border-light);
-    color: var(--text-muted);
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #F1F5F9;
+    color: #64748B;
+    text-decoration: none;
+    border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
+  
   .btn-icon:hover {
-    background: #F8FAFC;
-    border-color: #CBD5E1;
-    color: var(--primary);
+    background: var(--primary, #3B82F6);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
   }
-  .btn-icon i { width: 16px; height: 16px; }
+  
+  .btn-icon i, .btn-icon svg { width: 16px; height: 16px; }
   
   /* =========================================
-     6. MODALE (Basé sur #client-modal de clients.css)
+     6. MODALE (Identique KPI Dashboard)
      ========================================= */
   .modal-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(12, 22, 37, 0.5); backdrop-filter: blur(4px); 
+    background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); 
     display: flex; align-items: center; justify-content: center; 
     z-index: 1000; opacity: 0; visibility: hidden; pointer-events: none;
     transition: all 0.3s ease; 
   }
+  
   .modal-overlay.is-visible { opacity: 1; visibility: visible; pointer-events: auto; }
   
   .modal-card {
-    background: var(--bg-surface, #FFFFFF);
-    border-radius: 12px;
-    width: min(600px, 95vw); /* Taille exacte issue de clients.css */
+    width: min(600px, 95vw);
+    border-radius: 16px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
     transform: translateY(20px);
-    transition: transform 0.3s ease;
-    border: 1px solid var(--border-light);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  
   .modal-overlay.is-visible .modal-card { transform: translateY(0); }
   
-  /* Header de la Modale aligné sur clients.css */
   .modal-header {
     padding: 24px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid #E2E8F0;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -282,51 +300,86 @@
     align-items: center;
   }
   
+  /* --- ICÔNE KPI DU DASHBOARD --- */
   .modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    background-color: rgba(100, 116, 139, 0.1);
-    color: #0C1625;
-    border-radius: 12px;
-    margin-right: 16px;
+    flex-shrink: 0;
+    margin-right: 18px;
+    transition: transform 0.3s ease;
+    
+    /* Couleurs pastels plates (équivalent à .icon-blue) */
+    background: #DBEAFE; 
+    color: #2563EB;
+    border: none;
+    box-shadow: none;
   }
   
-  .modal-header-text h3 { margin: 0; font-size: 1.25rem; color: var(--text-main); line-height: 1.2; }
-  .modal-header-text p { margin: 0; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+  /* Effet de zoom fluide au survol de la modale */
+  .modal-card:hover .modal-icon {
+    transform: scale(1.05); 
+  }
+  
+  .modal-icon i, .modal-icon svg {
+    width: 26px;
+    height: 26px;
+    filter: none;
+  }
+  
+  .modal-header-content h3 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #0F172A; }
+  .modal-header-content p { margin: 4px 0 0 0; font-size: 0.85rem; color: #64748B; }
   
   .modal-close {
-    background: none; border: none; color: #94A3B8; cursor: pointer;
-    padding: 6px; border-radius: 6px; transition: all 0.2s;
+    background: #F1F5F9; border: none; color: #64748B; cursor: pointer;
+    padding: 8px; border-radius: 8px; transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
   }
-  .modal-close:hover { background: #FEF2F2; color: #B91C1C; }
   
-  /* Contenu de la Modale */
+  .modal-close:hover { background: #FEE2E2; color: #DC2626; }
+  
+  /* Contenu de la Modale "Kit de configuration" */
   .modal-body { padding: 24px; }
   
-  .config-item { margin-bottom: 16px; }
+  .config-item { margin-bottom: 20px; }
   .config-label {
     display: block; font-size: 0.75rem; font-weight: 700;
-    color: var(--text-muted); margin-bottom: 8px;
+    color: #64748B; margin-bottom: 8px;
     text-transform: uppercase; letter-spacing: 0.05em;
   }
   
   .copy-box {
     display: flex; justify-content: space-between; align-items: center;
-    background: var(--bg-input); border: 1.5px solid var(--border-light);
-    padding: 12px 16px; border-radius: 8px; transition: border-color 0.2s ease;
+    background: var(--bg-input); border: 1px solid #E2E8F0;
+    padding: 12px 16px; border-radius: 10px; transition: all 0.2s ease;
   }
-  .copy-box:hover { border-color: #CBD5E1; }
   
-  .btn-copy { background: none; border: none; color: #94A3B8; cursor: pointer; transition: color 0.2s; }
-  .btn-copy:hover { color: var(--primary); }
+  .copy-box:hover {
+    border-color: #CBD5E1;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  }
+  
+  .copy-box .font-mono {
+    background: transparent; border: none; padding: 0; font-size: 0.9rem;
+  }
+  
+  .btn-copy {
+    background: none; border: none; color: #94A3B8; cursor: pointer;
+    transition: all 0.2s; padding: 4px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  
+  .btn-copy:hover { color: #2563EB; background: #DBEAFE; }
+  
+  .notes-container { margin-top: 24px; }
   
   .notes-box {
     background: #FFFBEB; border-left: 4px solid #F59E0B;
     padding: 16px; font-size: 0.9rem; color: #92400E;
-    border-radius: 0 8px 8px 0; white-space: pre-wrap;
-    font-family: 'SFMono-Regular', Consolas, monospace;
+    border-radius: 0 10px 10px 0; white-space: pre-wrap;
+    font-family: ui-monospace, 'Cascadia Code', monospace;
+    line-height: 1.5;
   }
-  .mt-4 { margin-top: 24px; }

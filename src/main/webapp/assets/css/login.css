@@ -1,181 +1,229 @@
-/* login.css */
+/**
+ * login.css — Cohérence Visuelle EnvHub
+ * Direction Artistique : Premium SaaS (Bouton sombre conservé)
+ */
 
-* {
+/* =========================================
+   1. VARIABLES DE PORTÉE LOCALE
+   ========================================= */
+   :root {
+    /* Palette */
+    --bg-app: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-input: #F8FAFC;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border-light: #E2E8F0;
+    
+    /* Couleurs de marque */
+    --primary: #3B82F6;
+    
+    /* Arrondis & Ombres */
+    --shadow-sm: 0 2px 4px rgba(12, 22, 37, 0.02), 0 4px 6px rgba(12, 22, 37, 0.02);
+    --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.15); /* Ombre premium type Modale */
+    --focus-ring: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-}
-
-body {
+  }
+  
+  body {
     font-family: 'Satoshi', sans-serif;
-    /* Un fond légèrement plus contrasté pour faire ressortir la carte */
-    background-color: #F8FAFC; 
-    color: #0C1625; /* DS: Text */
+    background-color: var(--bg-app); 
+    color: var(--text-main);
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Petit motif subtil pour un côté "tech" */
-    background-image: radial-gradient(#E2E8F0 1px, transparent 1px);
-    background-size: 20px 20px;
-}
-
-h1, h2, h3, h4, h5, h6 {
+    
+    /* Motif pointillé subtil cohérent avec layout.css */
+    background-image: radial-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Inknut Antiqua', serif;
-    color: #0C1625;
-    font-weight: 700;
-}
-
-.hero-section {
+    color: var(--text-main);
+  }
+  
+  .hero-section {
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
-}
-
-.hero-content {
-    background-color: #FFFFFF; /* DS: Surface */
-    border: 1px solid rgba(226, 232, 240, 0.8); /* Border adoucie */
-    border-radius: 12px; /* Un peu plus arrondi (moderne) */
+  }
+  
+  /* =========================================
+     2. CARTE DE CONNEXION (Style Modale Premium)
+     ========================================= */
+  .hero-content {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 20px; /* Arrondi généreux SaaS */
     padding: 48px 40px;
     text-align: center;
     max-width: 440px;
     width: 100%;
-    /* Ombre plus douce et diffusée pour un effet "flottant" */
-    box-shadow: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
-}
-
-.hero-content h1 {
+    box-shadow: var(--shadow-card);
+    /* Apparition fluide */
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .hero-content h1 {
     font-size: 1.75rem;
-    margin-bottom: 12px;
+    font-weight: 800;
+    margin-bottom: 8px;
     line-height: 1.2;
-    letter-spacing: -0.02em; /* Rend l'Inknut plus resserré et moderne */
-}
-
-.hero-content .subtitle {
+    letter-spacing: -0.02em;
+  }
+  
+  .hero-content .subtitle {
     font-size: 0.95rem;
-    color: #64748B; /* DS: Primary */
+    color: var(--text-muted);
     margin-bottom: 40px;
     line-height: 1.5;
-}
-
-.login-form {
+  }
+  
+  /* =========================================
+     3. FORMULAIRE ET CHAMPS
+     ========================================= */
+  .login-form {
     display: flex;
     flex-direction: column;
-}
-
-.form-group {
+  }
+  
+  .form-group {
     margin-bottom: 24px;
     text-align: left;
-}
-
-.form-group label {
+  }
+  
+  .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #324155; /* Un peu plus doux que le noir complet */
-}
-
-.form-group input {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #334155;
+  }
+  
+  .form-group input {
     width: 100%;
     padding: 14px 16px;
-    border: 1.5px solid #E2E8F0; /* Bordure légèrement plus épaisse */
-    border-radius: 8px;
-    font-size: 1rem;
+    border: 1.5px solid var(--border-light);
+    border-radius: 10px; /* Alignement sur les inputs de l'app */
+    font-size: 0.95rem;
     font-family: 'Satoshi', sans-serif;
-    color: #0C1625;
-    background-color: #FAFAF9; /* Fond très légèrement grisé */
-    transition: all 0.2s ease;
-}
-
-.form-group input::placeholder {
-    color: #94A3B8; /* Placeholder plus discret */
-}
-
-/* État de focus moderne : bordure primaire et légère ombre */
-.form-group input:focus {
+    color: var(--text-main);
+    background-color: var(--bg-input);
+    transition: var(--transition-smooth);
+  }
+  
+  .form-group input::placeholder {
+    color: #94A3B8;
+  }
+  
+  .form-group input:focus {
     outline: none;
-    border-color: #64748B;
-    background-color: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.15);
-}
-
-.password-input-container {
+    border-color: var(--primary);
+    background-color: var(--bg-surface);
+    box-shadow: var(--focus-ring);
+  }
+  
+  /* =========================================
+     4. MOT DE PASSE (Icône Toggle)
+     ========================================= */
+  .password-input-container {
     position: relative;
     display: flex;
     align-items: center;
-}
-
-.password-input-container input {
+  }
+  
+  .password-input-container input {
     flex: 1;
     padding-right: 50px;
-}
-
-.toggle-password-btn {
+  }
+  
+  .toggle-password-btn {
     position: absolute;
     right: 12px;
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1.2rem;
-    color: #94A3B8; /* Plus discret par défaut */
+    color: #94A3B8;
     padding: 6px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    border-radius: 8px;
+    transition: var(--transition-smooth);
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.toggle-password-btn:hover {
-    color: #0C1625; /* S'assombrit au survol */
-    background-color: #F1F5F9;
-}
-
-.btn-login {
-    background-color: #0C1625; /* DS: Text - Plus impactant pour l'action principale */
+  }
+  
+  .toggle-password-btn:hover {
+    color: var(--primary);
+    background-color: #EFF6FF;
+  }
+  
+  /* =========================================
+     5. BOUTON PRINCIPAL (Sombre / Impactant)
+     ========================================= */
+  .btn-login {
+    background-color: #0C1625; /* Couleur sombre d'origine conservée */
     color: #FFFFFF;
     padding: 16px;
-    margin-top: 12px;
+    margin-top: 8px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 1rem;
     font-weight: 700;
     font-family: 'Satoshi', sans-serif;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
     width: 100%;
-    box-shadow: 0 4px 6px -1px rgba(12, 22, 37, 0.1);
-}
-
-.btn-login:hover {
-    background-color: #324155; /* DS: Accent */
-    transform: translateY(-1px); /* Léger soulèvement au survol */
-    box-shadow: 0 6px 8px -1px rgba(12, 22, 37, 0.15);
-}
-
-.btn-login:active {
+    box-shadow: 0 4px 6px -1px rgba(12, 22, 37, 0.15); /* Ombre douce de base */
+  }
+  
+  .btn-login:hover {
+    background-color: #324155; /* Survol d'origine conservé */
+    transform: translateY(-2px); /* Effet de soulèvement 3D conservé */
+    box-shadow: 0 10px 15px -3px rgba(12, 22, 37, 0.25), 0 4px 6px -4px rgba(12, 22, 37, 0.15);
+  }
+  
+  .btn-login:active {
     transform: translateY(0);
-}
-
-.error-message {
+  }
+  
+  /* =========================================
+     6. GESTION DES ERREURS
+     ========================================= */
+  .error-message {
     background-color: #FEF2F2;
     color: #B91C1C;
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    border: 1px solid #FECACA;
     padding: 14px;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-top: 24px;
     font-size: 0.9rem;
     font-weight: 500;
     text-align: center;
-    /* Petite animation d'apparition */
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
+    box-shadow: var(--shadow-sm);
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
-}
+  }
