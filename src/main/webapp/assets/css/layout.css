@@ -1,47 +1,35 @@
 /**
  * layout.css — Structure Globale (EnvHub)
- * Direction Artistique : Premium SaaS & Glow 3D
+ * Gère le Shell : Sidebar, Topbar, Typographie, Variables
  */
 
- @import url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@500;700;800&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@500;700&display=swap');
  @import url('https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap');
  
  :root {
-   /* Couleurs de fond et texte */
    --bg-app: #F8FAFC;
    --bg-surface: #FFFFFF;
-   --text-main: #0F172A;
+   --text-main: #0C1625;
    --text-muted: #64748B;
    --border-light: #E2E8F0;
    
-   /* Couleurs de marque (Premium Indigo/Blue) */
-   --primary: #3B82F6;
-   --primary-hover: #2563EB;
-   --accent: #4F46E5;
+   --primary: #64748B;
+   --accent: #324155;
    --accent-fg: #FFFFFF;
  
-   /* Sidebar (Dark Theme) */
-   --sidebar-bg: #0F172A;      
-   --sidebar-surface: #1E293B;
+   --sidebar-bg: #0C1625;      
+   --sidebar-surface: #1e293b;
    --sidebar-text: #F8FAFC;
    --sidebar-muted: #94A3B8;
-   --sidebar-border: rgba(255, 255, 255, 0.08);
-   --sidebar-hover: rgba(255, 255, 255, 0.05);
+   --sidebar-border: rgba(226, 232, 240, 0.1);
+   --sidebar-hover: rgba(248, 250, 252, 0.06);
  
-   /* Arrondis */
    --radius-sm: 8px;
    --radius-md: 12px;
    --radius-lg: 16px;
    
-   /* Ombres Premium SaaS */
-   --shadow-sm: 0 2px 4px rgba(12, 22, 37, 0.02), 0 4px 6px rgba(12, 22, 37, 0.02);
-   --shadow-md: 0 12px 20px -5px rgba(12, 22, 37, 0.08), 0 8px 10px -6px rgba(12, 22, 37, 0.04);
-   --shadow-glow: 0 8px 16px -4px rgba(59, 130, 246, 0.3);
-   --shadow-dropdown: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-   --focus-ring: 0 0 0 4px rgba(59, 130, 246, 0.15);
-   
-   /* Transitions */
-   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+   --shadow-dropdown: 0 15px 30px -5px rgba(12, 22, 37, 0.3);
+   --focus-ring: 0 0 0 3px rgba(100, 116, 139, 0.15);
  }
  
  /* --- Resets Globaux --- */
@@ -51,9 +39,8 @@
    font-family: 'Satoshi', sans-serif;
    color: var(--text-main);
    background-color: var(--bg-app);
-   /* Motif pointillé très subtil */
-   background-image: radial-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px);
-   background-size: 24px 24px;
+   background-image: radial-gradient(var(--border-light) 1px, transparent 1px);
+   background-size: 20px 20px;
    min-height: 100vh;
    overflow: hidden;
    -webkit-font-smoothing: antialiased;
@@ -76,7 +63,7 @@
  .layout-content {
    flex: 1;
    overflow-y: auto;
-   padding: 1.5rem;
+   padding: 1rem;
  }
  
  .container {
@@ -99,11 +86,10 @@
    border-right: 1px solid var(--sidebar-border);
    z-index: 60;
    transition: transform 0.3s ease;
-   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
  }
  
  .sidebar-header {
-   height: 76px; /* Légèrement plus grand pour respirer */
+   height: 72px;
    padding: 0 1.5rem;
    display: flex;
    align-items: center;
@@ -111,36 +97,24 @@
    border-bottom: 1px solid var(--sidebar-border);
  }
  
- .sidebar-logo { display: flex; align-items: center; gap: 1rem; }
- 
- /* -- LOGO GLOW 3D (Identique aux icônes des modales) -- */
+ .sidebar-logo { display: flex; align-items: center; gap: 0.8rem; }
  .logo-box {
-   width: 36px;
-   height: 36px;
-   border-radius: 10px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-   color: var(--accent);
-   border: 1px solid rgba(79, 70, 229, 0.15);
-   box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3),
-               inset 0 2px 4px rgba(255, 255, 255, 0.6);
+   background: var(--sidebar-text);
+   color: var(--sidebar-bg);
+   width: 30px;
+   height: 30px;
+   border-radius: var(--radius-sm);
+   display: grid;
+   place-items: center;
  }
- .logo-box i, .logo-box svg {
-   width: 20px;
-   height: 20px;
-   stroke-width: 2.2px;
-   filter: drop-shadow(0 2px 2px rgba(79, 70, 229, 0.4));
- }
- .logo-text { font-size: 1.3rem; font-weight: 800; color: var(--sidebar-text); }
+ .logo-text { font-size: 1.1rem; color: var(--sidebar-text); }
  
  .sidebar-nav { flex: 1; padding: 2rem 1.25rem; overflow-y: auto; }
  .nav-group + .nav-group { margin-top: 2.5rem; }
  .nav-group-label {
-   font-size: 0.75rem;
+   font-size: 0.7rem;
    text-transform: uppercase;
-   color: rgba(255, 255, 255, 0.3);
+   color:#434d5a;
    letter-spacing: 0.08em;
    margin-bottom: 1rem;
    padding-left: 0.75rem;
@@ -150,44 +124,38 @@
  .nav-item {
    display: flex;
    align-items: center;
-   gap: 1rem;
+   gap: 0.8rem;
    width: 100%;
-   padding: 0.7rem 1rem;
+   padding: 0.6rem 0.75rem;
    color: var(--sidebar-muted);
-   border-radius: 10px;
-   font-size: 0.95rem;
+   border-radius: var(--radius-sm);
+   font-size: 0.9rem;
    font-weight: 500;
-   transition: var(--transition-smooth);
-   margin-bottom: 0.25rem;
-   border: 1px solid transparent;
+   transition: all 0.2s ease;
+   margin-bottom: 0.15rem;
  }
  
+ /* Calibration des icônes SVG dans le menu */
  .nav-item svg {
    width: 18px;
    height: 18px;
    flex-shrink: 0;
-   opacity: 0.7;
-   transition: var(--transition-smooth);
+   opacity: 0.8;
+   transition: opacity 0.2s ease;
  }
  
  .nav-item:hover {
    background: var(--sidebar-hover);
    color: var(--sidebar-text);
  }
- .nav-item:hover svg { opacity: 1; transform: scale(1.1); }
+ .nav-item:hover svg { opacity: 1; }
  
- /* -- État Actif Premium -- */
  .nav-item.is-active {
-   background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, transparent 100%);
-   border-left: 3px solid var(--primary);
-   color: #FFFFFF;
+   background: var(--sidebar-text);
+   color: var(--sidebar-bg);
    font-weight: 700;
  }
- .nav-item.is-active svg { 
-   opacity: 1; 
-   color: #60A5FA; /* Rendu lumineux de l'icône */
-   filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.4));
- }
+ .nav-item.is-active svg { opacity: 1; }
  
  /* Profil & Menu Déroulant */
  .sidebar-footer { padding: 1.25rem; border-top: 1px solid var(--sidebar-border); }
@@ -198,39 +166,37 @@
    width: 100%;
    gap: 0.75rem;
    padding: 0.75rem;
-   border-radius: 10px;
+   border-radius: var(--radius-sm);
    background: transparent;
    border: 1px solid transparent;
    color: var(--sidebar-text);
    cursor: pointer;
-   transition: var(--transition-smooth);
+   transition: background 0.2s;
    text-align: left;
  }
  .user-trigger:hover { background: var(--sidebar-hover); }
  
  .avatar {
-   width: 36px;
-   height: 36px;
-   border-radius: 10px;
+   width: 32px;
+   height: 32px;
+   border-radius: 50%;
    display: grid;
    place-items: center;
    background: var(--sidebar-surface);
    border: 1px solid var(--sidebar-border);
-   color: var(--sidebar-muted);
  }
  .user-meta { flex: 1; }
- .user-name { display: block; font-size: 0.9rem; font-weight: 700; color: var(--sidebar-text); }
- .user-role { display: block; font-size: 0.75rem; color: var(--sidebar-muted); }
+ .user-name { display: block; font-size: 0.85rem; font-weight: 700; color: var(--sidebar-text); }
+ .user-role { display: block; font-size: 0.7rem; color: var(--sidebar-muted); }
  
- /* Dropdown User (Glow et Arrondis) */
  .dropdown-panel {
    position: absolute;
    left: 0;
    right: 0;
    bottom: calc(100% + 0.5rem);
-   background: var(--bg-surface);
-   border: 1px solid var(--border-light);
-   border-radius: var(--radius-lg);
+   background: var(--sidebar-surface);
+   border: 1px solid var(--sidebar-border);
+   border-radius: var(--radius-md);
    box-shadow: var(--shadow-dropdown);
    padding: 0.5rem;
    opacity: 1;
@@ -246,35 +212,30 @@
    align-items: center;
    gap: 0.75rem;
    width: 100%;
-   padding: 0.7rem 0.75rem;
-   color: var(--text-main);
+   padding: 0.6rem 0.75rem;
+   color: var(--sidebar-muted);
    background: transparent;
    border: none;
-   border-radius: 10px;
+   border-radius: 6px;
    cursor: pointer;
-   font-size: 0.9rem;
-   font-weight: 600;
-   transition: var(--transition-smooth);
+   font-size: 0.85rem;
+   font-weight: 500;
+   transition: all 0.2s ease;
  }
- .dropdown-item svg { width: 16px; height: 16px; color: var(--text-muted); }
- .dropdown-item:hover { background: #F1F5F9; color: var(--primary); }
- .dropdown-item:hover svg { color: var(--primary); }
- 
- .dropdown-sep { border: none; border-top: 1px solid var(--border-light); margin: 0.4rem 0; }
- .dropdown-item.text-red-600 { color: #DC2626; }
- .dropdown-item.text-red-600 svg { color: #DC2626; }
- .dropdown-item.text-red-600:hover { background: #FEF2F2; color: #B91C1C; }
+ .dropdown-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+ .dropdown-item:hover { background: var(--sidebar-hover); color: var(--sidebar-text); }
+ .dropdown-sep { border: none; border-top: 1px solid var(--sidebar-border); margin: 0.4rem 0; }
+ .dropdown-item.text-red-600 { color: #FCA5A5; }
+ .dropdown-item.text-red-600:hover { background: rgba(220, 38, 38, 0.15); color: #FECACA; }
  
  /* =========================================
-    TOP BAR (Glassmorphism Premium)
+    TOP BAR & RECHERCHE
     ========================================= */
  .top-bar {
-   height: 76px;
-   background: rgba(255, 255, 255, 0.85);
-   backdrop-filter: blur(12px); /* Effet verre plus doux */
-   -webkit-backdrop-filter: blur(12px);
-   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-   box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.05); /* Légère ombre pour détacher du fond */
+   height: 72px;
+   background: rgba(248, 250, 252, 0.8);
+   backdrop-filter: blur(16px);
+   border-bottom: 1px solid var(--border-light);
    display: flex;
    align-items: center;
    justify-content: space-between;
@@ -285,39 +246,59 @@
  }
  .top-bar-left, .top-bar-right { display: flex; align-items: center; gap: 1.5rem; padding: 0 1.25rem; }
  
- .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
- .breadcrumb-item.font-bold { font-weight: 800; color: var(--text-main); font-size: 1.1rem; }
+ .search-input-wrapper { position: relative; width: 320px; }
+ .search-icon {
+   position: absolute;
+   left: 1rem;
+   top: 50%;
+   transform: translateY(-50%);
+   color: var(--text-muted);
+   width: 16px;
+ }
+ .search-input-wrapper input {
+   width: 100%;
+   padding: 0.6rem 1rem 0.6rem 2.5rem;
+   border: 1.5px solid var(--border-light);
+   border-radius: var(--radius-sm);
+   background: #FAFAF9;
+   font-size: 0.85rem;
+   color: var(--text-main);
+   transition: all 0.2s ease;
+ }
+ .search-input-wrapper input:focus {
+   background: var(--bg-surface);
+   border-color: var(--primary);
+   box-shadow: var(--focus-ring);
+ }
  
- /* --- Boutons d'action principaux --- */
+ /* --- Boutons Génériques --- */
  .btn {
    border: none;
-   border-radius: 10px; /* Arrondi moderne */
-   padding: 0.65rem 1.25rem;
-   font-size: 0.9rem;
+   border-radius: var(--radius-sm);
+   padding: 0.6rem 1.25rem;
+   font-size: 0.85rem;
    font-weight: 700;
    cursor: pointer;
    display: flex;
    align-items: center;
    gap: 0.5rem;
-   transition: var(--transition-smooth);
+   transition: all 0.2s ease;
  }
  .btn svg { width: 16px; height: 16px; }
  
- /* -- BOUTON PRIMAIRE (Sombre / Impactant) -- */
  .btn-primary {
-   background-color: #0C1625;
-   color: #FFFFFF;
-   border: none;
-   box-shadow: 0 4px 6px -1px rgba(12, 22, 37, 0.15);
+   background: var(--text-main);
+   color: var(--bg-surface);
+   box-shadow: 0 4px 6px -1px rgba(12, 22, 37, 0.1);
  }
  .btn-primary:hover { 
-   background-color: #324155;
-   transform: translateY(-2px);
-   box-shadow: 0 10px 15px -3px rgba(12, 22, 37, 0.25), 0 4px 6px -4px rgba(12, 22, 37, 0.15);
+   background: var(--accent);
+   transform: translateY(-1px);
+   box-shadow: 0 6px 8px -1px rgba(12, 22, 37, 0.15);
  }
  .btn-primary:active { transform: translateY(0); }
  
- /* --- Boutons d'action (Icônes secondaires) --- */
+ /* Boutons d'action (Icônes) */
  .btn-icon {
    display: inline-flex;
    align-items: center;
@@ -325,16 +306,21 @@
    background: transparent;
    border: none;
    cursor: pointer;
-   border-radius: 10px;
-   transition: var(--transition-smooth);
+   border-radius: 6px;
+   transition: all 0.2s ease;
    color: var(--text-muted);
    position: relative;
  }
+ 
  .btn-icon:hover {
-   background: #F1F5F9;
-   color: var(--primary);
+   background: var(--sidebar-hover); /* ou une autre couleur claire */
+   color: var(--text-main);
  }
- .btn-icon svg { width: 20px; height: 20px; }
+ 
+ .btn-icon svg {
+   width: 20px;
+   height: 20px;
+ }
  
  .badge-dot {
    position: absolute;
