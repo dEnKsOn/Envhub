@@ -14,9 +14,12 @@ import models.StatutProjet;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
-@WebServlet("/projets")
+@WebServlet("/admin/projets")
 public class ProjetsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -37,16 +40,13 @@ public class ProjetsServlet extends HttpServlet {
         }
 
         String searchQuery = request.getParameter("search");
-        if (searchQuery != null) {
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             searchQuery = searchQuery.trim();
-        }
-
-        if (searchQuery != null && !searchQuery.isEmpty()) {
             request.setAttribute("searchQuery", searchQuery);
-            java.util.List<Projet> resultats = projetDAO.search(searchQuery);
-            if (resultats == null) {
-                resultats = java.util.Collections.emptyList();
-            }
+            List<Projet> resultats = projetDAO.search(searchQuery);
+            
+            if (resultats == null) resultats = Collections.emptyList();
+            
             request.setAttribute("listeProjets", resultats);
             if (resultats.isEmpty()) {
                 request.setAttribute("searchNotFound", true);
@@ -56,7 +56,8 @@ public class ProjetsServlet extends HttpServlet {
         }
 
         request.setAttribute("listeClients", clientDAO.findAll());
-        request.getRequestDispatcher("/projets.jsp").forward(request, response);
+        // Ici, on forward bien vers le WRAPPER !
+        request.getRequestDispatcher("/admin/projets.jsp").forward(request, response);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class ProjetsServlet extends HttpServlet {
             return;
         }
 
-        // Récupération des paramètres
+        Projet projet = new Projet();
         String nom = request.getParameter("nom");
         String clientStr = request.getParameter("client");
         String statutStr = request.getParameter("statut");
@@ -85,29 +86,22 @@ public class ProjetsServlet extends HttpServlet {
         String description = request.getParameter("description");
 
         if (nom == null || nom.trim().isEmpty() || clientStr == null || clientStr.trim().isEmpty()) {
-            request.setAttribute("erreur", "Veuillez remplir les champs obligatoires (Nom, Client).");
-            loadData(request);
-            request.getRequestDispatcher("/projets.jsp").forward(request, response);
+            forwardWithError(request, response, "Veuillez remplir les champs obligatoires (Nom, Client).", projet);
             return;
         }
 
-        Projet projet = new Projet();
         projet.setNomProjet(nom.trim());
+        projet.setDescriptionTech(description != null ? description.trim() : null);
+
         try {
             projet.setIdClient(UUID.fromString(clientStr));
         } catch (IllegalArgumentException e) {
-            request.setAttribute("erreur", "Client invalide.");
-            loadData(request);
-            request.getRequestDispatcher("/projets.jsp").forward(request, response);
+            forwardWithError(request, response, "Client invalide.", projet);
             return;
         }
         
         try {
-            if (statutStr == null || statutStr.trim().isEmpty()) {
-                projet.setStatutProjet(StatutProjet.EN_COURS);
-            } else {
-                projet.setStatutProjet(StatutProjet.valueOf(statutStr));
-            }
+            projet.setStatutProjet(statutStr != null && !statutStr.trim().isEmpty() ? StatutProjet.valueOf(statutStr) : StatutProjet.EN_COURS);
         } catch (IllegalArgumentException e) {
             projet.setStatutProjet(StatutProjet.EN_COURS);
         }
@@ -115,9 +109,7 @@ public class ProjetsServlet extends HttpServlet {
         int avancement = 0;
         if (avancementStr != null && !avancementStr.trim().isEmpty()) {
             try {
-                avancement = Integer.parseInt(avancementStr);
-                if (avancement < 0) avancement = 0;
-                if (avancement > 100) avancement = 100;
+                avancement = Math.max(0, Math.min(100, Integer.parseInt(avancementStr))); 
             } catch (NumberFormatException e) {
                 avancement = 0;
             }
@@ -125,95 +117,76 @@ public class ProjetsServlet extends HttpServlet {
         projet.setPourcentageAvancement(avancement);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        if (dateLancementStr == null || dateLancementStr.trim().isEmpty()) {
-            projet.setDateLancement(new java.util.Date());
-        } else {
-            try {
+        try {
+            if (dateLancementStr == null || dateLancementStr.trim().isEmpty()) {
+                projet.setDateLancement(new Date());
+            } else {
                 projet.setDateLancement(sdf.parse(dateLancementStr));
-            } catch (ParseException e) {
-                request.setAttribute("erreur", "Format de date de lancement invalide.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
-                return;
             }
-        }
 
-        if (dateLivraisonStr != null && !dateLivraisonStr.trim().isEmpty()) {
-            try {
+            if (dateLivraisonStr != null && !dateLivraisonStr.trim().isEmpty()) {
                 projet.setDateLivraisonEstimee(sdf.parse(dateLivraisonStr));
-            } catch (ParseException e) {
-                request.setAttribute("erreur", "Format de date de livraison invalide.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
+            }
+        } catch (ParseException e) {
+            forwardWithError(request, response, "Format de date invalide.", projet);
+            return;
+        }
+
+        if ("update".equals(action)) {
+            if (projetId == null || projetId.trim().isEmpty()) {
+                forwardWithError(request, response, "Identifiant de projet manquant pour la mise à jour.", projet);
                 return;
             }
-        }
-        
-        projet.setDescriptionTech(description != null ? description.trim() : null);
-
-        // MODE UPDATE
-        if ("update".equals(action) && projetId != null && !projetId.trim().isEmpty()) {
             try {
                 projet.setIdProjet(UUID.fromString(projetId));
             } catch (IllegalArgumentException e) {
-                request.setAttribute("erreur", "Identifiant de projet invalide.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
+                forwardWithError(request, response, "Identifiant de projet invalide.", projet);
                 return;
             }
 
-            boolean updated = projetDAO.update(projet);
-            if (updated) {
-                response.sendRedirect(request.getContextPath() + "/projets?success=true");
+            if (projetDAO.update(projet)) {
+                response.sendRedirect(request.getContextPath() + "/admin/projets?success=true");
             } else {
-                request.setAttribute("erreur", "Impossible de mettre à jour le projet.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
+                forwardWithError(request, response, "Impossible de mettre à jour le projet.", projet);
             }
-            return;
-        }
-
-        // MODE CREATE
-        if ("create".equals(action) || action == null) {
-            boolean saved = projetDAO.save(projet);
-            if (saved) {
-                response.sendRedirect(request.getContextPath() + "/projets?success=true");
+            
+        } else if ("create".equals(action) || action == null) {
+            if (projetDAO.save(projet)) {
+                response.sendRedirect(request.getContextPath() + "/admin/projets?success=true");
             } else {
-                request.setAttribute("erreur", "Impossible d'enregistrer le projet.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
+                forwardWithError(request, response, "Impossible d'enregistrer le projet.", projet);
             }
-            return;
+            
+        } else {
+            forwardWithError(request, response, "Action non reconnue.", projet);
         }
-
-        request.setAttribute("erreur", "Action non reconnue.");
-        loadData(request);
-        request.getRequestDispatcher("/projets.jsp").forward(request, response);
     }
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response, String projetId) throws IOException, ServletException {
         if (projetId == null || projetId.trim().isEmpty()) {
-            request.setAttribute("erreur", "Projet introuvable pour suppression.");
-            loadData(request);
-            request.getRequestDispatcher("/projets.jsp").forward(request, response);
+            forwardWithError(request, response, "Projet introuvable pour suppression.", null);
             return;
         }
 
         try {
-            UUID uuid = UUID.fromString(projetId);
-            boolean deleted = projetDAO.delete(uuid);
-            if (deleted) {
-                response.sendRedirect(request.getContextPath() + "/projets?success=true");
+            if (projetDAO.delete(UUID.fromString(projetId))) {
+                response.sendRedirect(request.getContextPath() + "/admin/projets?success=true");
             } else {
-                request.setAttribute("erreur", "Impossible de supprimer le projet. Des éléments y sont rattachés.");
-                loadData(request);
-                request.getRequestDispatcher("/projets.jsp").forward(request, response);
+                forwardWithError(request, response, "Impossible de supprimer le projet. Des éléments y sont rattachés.", null);
             }
         } catch (IllegalArgumentException e) {
-            request.setAttribute("erreur", "Identifiant de projet invalide pour suppression.");
-            loadData(request);
-            request.getRequestDispatcher("/projets.jsp").forward(request, response);
+            forwardWithError(request, response, "Identifiant de projet invalide pour suppression.", null);
         }
+    }
+
+    private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String message, Projet projetEnCours) throws ServletException, IOException {
+        request.setAttribute("erreur", message);
+        if (projetEnCours != null) {
+            request.setAttribute("projetSaisi", projetEnCours); 
+        }
+        loadData(request);
+        // Ici aussi, on forward bien vers le WRAPPER !
+        request.getRequestDispatcher("/admin/projets.jsp").forward(request, response);
     }
 
     private boolean isAuthenticated(HttpServletRequest request) {

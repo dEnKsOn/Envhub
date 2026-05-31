@@ -53,7 +53,7 @@ public class LoginServlet extends HttpServlet {
         Utilisateur user = utilisateurDAO.authenticate(email, password);
         
         if (user != null) {
-            // 3. Prévention contre la fixation ide session
+            // 3. Prévention contre la fixation de session
             HttpSession oldSession = request.getSession(false);
             if (oldSession != null) {
                 oldSession.invalidate();
@@ -63,8 +63,21 @@ public class LoginServlet extends HttpServlet {
             HttpSession newSession = request.getSession(true);
             newSession.setAttribute("user", user);
             
-            // 5. Redirection post-connexion
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            // 5. REDIRECTION BASÉE SUR LE RÔLE (L'Aiguilleur)
+            String role = user.getProfil().getLibelle();
+            
+            if ("Administrateur".equals(role)) {
+                // L'admin va sur le dashboard global que nous avons créé
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            } else if ("Développeur".equals(role)) {
+                // Le développeur est redirigé vers son espace dédié
+                response.sendRedirect(request.getContextPath() + "/dev/mes-projets");
+            } else {
+                // Rôle inconnu (Sécurité)
+                newSession.invalidate();
+                request.setAttribute("error", "Rôle non reconnu. Contactez l'administrateur.");
+                request.getRequestDispatcher(VUE_LOGIN).forward(request, response);
+            }
         } else {
             // Échec (Identifiants faux)
             request.setAttribute("error", "Email/Mot de passe incorrect.");

@@ -16,12 +16,12 @@
     </button>
   </div>
 
-  <form action="${pageContext.request.contextPath}/clients" method="get" class="search-form" id="search-form">
+  <form action="${pageContext.request.contextPath}/admin/clients" method="get" class="search-form" id="search-form">
     <div class="search-input-wrapper">
       <input type="search" id="search-input" name="search" value="${searchQuery}" placeholder="Rechercher par entreprise, nom ou prénom" class="form-control" />
     </div>
     <c:if test="${not empty searchQuery}">
-      <a class="btn" href="${pageContext.request.contextPath}/clients">Réinitialiser</a>
+      <a class="btn" href="${pageContext.request.contextPath}/admin/clients">Réinitialiser</a>
     </c:if>
   </form>
 
@@ -124,7 +124,7 @@
       </button>
     </header>
     
-    <form id="client-modal-form" action="${pageContext.request.contextPath}/clients" method="post">
+    <form id="client-modal-form" action="${pageContext.request.contextPath}/admin/clients" method="post">
       <input type="hidden" name="formAction" id="client-form-action" value="create" />
       <input type="hidden" name="clientId" id="clientId" />
       <div class="modal-body stack stack-sm">
@@ -171,7 +171,7 @@
         <i data-lucide="x"></i>
       </button>
     </header>
-    <form id="delete-client-form" action="${pageContext.request.contextPath}/clients" method="post">
+    <form id="delete-client-form" action="${pageContext.request.contextPath}/admin/clients" method="post">
       <input type="hidden" name="formAction" value="delete" />
       <input type="hidden" name="clientId" id="delete-client-id" />
       <div class="modal-body">

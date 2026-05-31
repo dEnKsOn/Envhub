@@ -56,10 +56,6 @@ public class UtilisateursServlet extends HttpServlet {
 
         request.setAttribute("listeProfils", profilDAO.findAll());
         
-        // Si tu utilises le base_layout.jsp, n'oublie pas d'utiliser les attributs pageContent et de forward vers le layout
-        // request.setAttribute("pageContent", "/WEB-INF/views/admin/utilisateurs.jsp");
-        // request.getRequestDispatcher("/WEB-INF/views/base_layout.jsp").forward(request, response);
-        
         request.getRequestDispatcher("/admin/utilisateurs.jsp").forward(request, response);
     }
 
@@ -74,7 +70,19 @@ public class UtilisateursServlet extends HttpServlet {
         String action = request.getParameter("formAction");
         String userId = request.getParameter("userId");
 
+        // --- DÉTECTION DE L'ADMINISTRATEUR ACTUEL ---
+        int adminProfilId = getAdminProfilId();
+        Utilisateur currentAdmin = getCurrentAdmin(adminProfilId);
+
+        // --- GESTION DE LA SUPPRESSION ---
         if ("delete".equals(action)) {
+            // Règle 1 : Interdiction formelle de supprimer l'Admin
+            if (currentAdmin != null && currentAdmin.getIdUser().toString().equals(userId)) {
+                request.setAttribute("erreur", "Opération interdite : Vous ne pouvez pas supprimer l'Administrateur unique du système.");
+                loadData(request);
+                request.getRequestDispatcher("/admin/utilisateurs.jsp").forward(request, response);
+                return;
+            }
             handleDelete(request, response, userId);
             return;
         }
@@ -83,7 +91,7 @@ public class UtilisateursServlet extends HttpServlet {
         String prenom = request.getParameter("prenom");
         String nom = request.getParameter("nom");
         String email = request.getParameter("email");
-        String genre = request.getParameter("genre"); // CORRECTION : Récupération du genre
+        String genre = request.getParameter("genre"); 
         String password = request.getParameter("password");
         String idProfilStr = request.getParameter("idProfil");
 
@@ -112,14 +120,12 @@ public class UtilisateursServlet extends HttpServlet {
         utilisateur.setNomUser(nom.trim());
         utilisateur.setEmail(email.trim());
         
-        // CORRECTION : Affectation du genre (peut être null en base)
         if (genre != null && !genre.trim().isEmpty()) {
             utilisateur.setGenre(genre.trim());
         } else {
             utilisateur.setGenre(null);
         }
 
-        // Hashage du mot de passe uniquement s'il est fourni
         if (password != null && !password.trim().isEmpty()) {
             utilisateur.setPassword(BCrypt.hashpw(password.trim(), BCrypt.gensalt()));
         }
@@ -128,8 +134,30 @@ public class UtilisateursServlet extends HttpServlet {
         profil.setIdProfil(idProfil);
         utilisateur.setProfil(profil);
 
-        // MODE UPDATE
+        // --- MODE UPDATE ---
         if ("update".equals(action) && userId != null && !userId.trim().isEmpty()) {
+            
+            // Règles strictes pour l'unicité de l'Administrateur
+            if (currentAdmin != null) {
+                if (currentAdmin.getIdUser().toString().equals(userId)) {
+                    // Si on modifie l'Admin actuel, on vérifie qu'il garde son rôle
+                    if (idProfil != adminProfilId) {
+                        request.setAttribute("erreur", "Opération interdite : L'Administrateur ne peut pas perdre ses droits. Il doit y avoir un Admin.");
+                        loadData(request);
+                        request.getRequestDispatcher("/admin/utilisateurs.jsp").forward(request, response);
+                        return;
+                    }
+                } else {
+                    // Si on modifie un autre utilisateur, on vérifie qu'on ne le transforme pas en Admin
+                    if (idProfil == adminProfilId) {
+                        request.setAttribute("erreur", "Opération interdite : Un Administrateur existe déjà. Impossible d'en nommer un deuxième.");
+                        loadData(request);
+                        request.getRequestDispatcher("/admin/utilisateurs.jsp").forward(request, response);
+                        return;
+                    }
+                }
+            }
+
             try {
                 utilisateur.setIdUser(UUID.fromString(userId));
             } catch (IllegalArgumentException e) {
@@ -150,8 +178,17 @@ public class UtilisateursServlet extends HttpServlet {
             return;
         }
 
-        // MODE CREATE
+        // --- MODE CREATE ---
         if ("create".equals(action) || action == null) {
+            
+            // Règle 3 : Interdiction de créer un deuxième Admin
+            if (idProfil == adminProfilId && currentAdmin != null) {
+                request.setAttribute("erreur", "Opération interdite : Un Administrateur existe déjà. Impossible d'en créer un deuxième.");
+                loadData(request);
+                request.getRequestDispatcher("/admin/utilisateurs.jsp").forward(request, response);
+                return;
+            }
+
             if (password == null || password.trim().isEmpty()) {
                 request.setAttribute("erreur", "Le mot de passe est obligatoire pour un nouvel utilisateur.");
                 loadData(request);
@@ -159,7 +196,6 @@ public class UtilisateursServlet extends HttpServlet {
                 return;
             }
 
-            // Pour la création, on s'assure que le mot de passe est bien hashé s'il n'a pas été capturé plus haut
             if (utilisateur.getPassword() == null) {
                 utilisateur.setPassword(BCrypt.hashpw(password.trim(), BCrypt.gensalt()));
             }
@@ -181,6 +217,7 @@ public class UtilisateursServlet extends HttpServlet {
     }
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response, String userId) throws IOException, ServletException {
+        // Le code de handleDelete reste identique
         if (userId == null || userId.trim().isEmpty()) {
             request.setAttribute("erreur", "Utilisateur introuvable pour suppression.");
             loadData(request);
@@ -213,5 +250,35 @@ public class UtilisateursServlet extends HttpServlet {
     private void loadData(HttpServletRequest request) {
         request.setAttribute("listeUtilisateurs", utilisateurDAO.findAll());
         request.setAttribute("listeProfils", profilDAO.findAll());
+    }
+
+    // ==============================================================
+    // MÉTHODES UTILITAIRES POUR GÉRER L'UNICITÉ DE L'ADMINISTRATEUR
+    // ==============================================================
+    
+    /**
+     * Recherche dynamiquement l'ID du profil "Administrateur" dans la BD
+     */
+    private int getAdminProfilId() {
+        for (Profil p : profilDAO.findAll()) {
+            if ("Administrateur".equalsIgnoreCase(p.getLibelle())) {
+                return p.getIdProfil();
+            }
+        }
+        return -1; // En cas d'erreur de base de données
+    }
+
+    /**
+     * Retourne l'utilisateur actuel qui possède le profil "Administrateur" (s'il y en a un)
+     */
+    private Utilisateur getCurrentAdmin(int adminProfilId) {
+        if (adminProfilId == -1) return null;
+        
+        for (Utilisateur u : utilisateurDAO.findAll()) {
+            if (u.getProfil() != null && u.getProfil().getIdProfil() == adminProfilId) {
+                return u; // L'Admin a été trouvé !
+            }
+        }
+        return null;
     }
 }

@@ -2,8 +2,6 @@
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/projets.css">
-
 <div class="stack stack-lg">
   
   <div class="flex items-center justify-between gap-4 wrap">
@@ -17,12 +15,12 @@
     </button>
   </div>
 
-  <form action="${pageContext.request.contextPath}/projets" method="get" class="search-form" id="search-form">
+  <form action="${pageContext.request.contextPath}/admin/projets" method="get" class="search-form" id="search-form">
     <div class="search-input-wrapper">
       <input type="search" id="search-input" name="search" value="${searchQuery}" placeholder="Rechercher par nom de projet ou client" class="form-control" />
     </div>
     <c:if test="${not empty searchQuery}">
-      <a class="btn" href="${pageContext.request.contextPath}/projets">Réinitialiser</a>
+      <a class="btn" href="${pageContext.request.contextPath}/admin/projets">Réinitialiser</a>
     </c:if>
   </form>
 
@@ -149,16 +147,17 @@
       </button>
     </header>
     
-    <form id="projet-modal-form" action="${pageContext.request.contextPath}/projets" method="post">
-      <input type="hidden" name="formAction" id="projet-form-action" value="create" />
-      <input type="hidden" name="projetId" id="projetId" />
+    <form id="projet-modal-form" action="${pageContext.request.contextPath}/admin/projets" method="post">
+      <input type="hidden" name="formAction" id="projet-form-action" value="${not empty projetSaisi && not empty projetSaisi.idProjet ? 'update' : 'create'}" />
+      <input type="hidden" name="projetId" id="projetId" value="${projetSaisi.idProjet}" />
+      
       <div class="modal-body stack stack-sm" style="max-height: 70vh; overflow-y: auto;">
         
         <div class="form-group">
           <label for="nom">Nom du projet *</label>
           <div class="input-with-icon">
             <i data-lucide="folder"></i>
-            <input type="text" id="nom" name="nom" required class="form-control" placeholder="Ex: EnvHub Refonte" />
+            <input type="text" id="nom" name="nom" required class="form-control" placeholder="Ex: EnvHub Refonte" value="<c:out value='${projetSaisi.nomProjet}'/>" />
           </div>
         </div>
 
@@ -167,7 +166,9 @@
           <select id="client" name="client" required class="form-control">
             <option value="">Sélectionnez un client...</option>
             <c:forEach items="${listeClients}" var="client">
-                <option value="${client.idClient}">${client.entrepriseClient} (${client.nomClient})</option>
+                <option value="${client.idClient}" <c:if test="${projetSaisi != null && projetSaisi.idClient == client.idClient}">selected</c:if>>
+                    ${client.entrepriseClient} (${client.nomClient})
+                </option>
             </c:forEach>
           </select>
         </div>
@@ -176,10 +177,10 @@
             <div class="form-group">
                 <label for="statut">Statut *</label>
                 <select id="statut" name="statut" class="form-control">
-                    <option value="EN_COURS">En cours</option>
-                    <option value="EN_PAUSE">En pause</option>
-                    <option value="LIVRE">Livré</option>
-                    <option value="ANNULE">Annulé</option>
+                    <option value="EN_COURS" ${projetSaisi.statutProjet == 'EN_COURS' ? 'selected' : ''}>En cours</option>
+                    <option value="EN_PAUSE" ${projetSaisi.statutProjet == 'EN_PAUSE' ? 'selected' : ''}>En pause</option>
+                    <option value="LIVRE" ${projetSaisi.statutProjet == 'LIVRE' ? 'selected' : ''}>Livré</option>
+                    <option value="ANNULE" ${projetSaisi.statutProjet == 'ANNULE' ? 'selected' : ''}>Annulé</option>
                 </select>
             </div>
             
@@ -187,7 +188,7 @@
                 <label for="avancement">Progression (%) *</label>
                 <div class="input-with-icon">
                     <i data-lucide="percent"></i>
-                    <input type="number" id="avancement" name="avancement" class="form-control" min="0" max="100" value="0" />
+                    <input type="number" id="avancement" name="avancement" class="form-control" min="0" max="100" value="${projetSaisi != null ? projetSaisi.pourcentageAvancement : '0'}" />
                 </div>
             </div>
         </div>
@@ -197,21 +198,21 @@
             <label for="dateLancement">Date de lancement *</label>
             <div class="input-with-icon">
               <i data-lucide="calendar"></i>
-              <input type="date" id="dateLancement" name="dateLancement" class="form-control" />
+              <input type="date" id="dateLancement" name="dateLancement" class="form-control" value="<fmt:formatDate value='${projetSaisi.dateLancement}' pattern='yyyy-MM-dd'/>" />
             </div>
           </div>
           <div class="form-group">
             <label for="dateLivraison">Date de livraison estimée</label>
             <div class="input-with-icon">
               <i data-lucide="calendar"></i>
-              <input type="date" id="dateLivraison" name="dateLivraison" class="form-control" />
+              <input type="date" id="dateLivraison" name="dateLivraison" class="form-control" value="<fmt:formatDate value='${projetSaisi.dateLivraisonEstimee}' pattern='yyyy-MM-dd'/>" />
             </div>
           </div>
         </div>
         
         <div class="form-group">
           <label for="description">Description technique</label>
-          <textarea id="description" name="description" class="form-control" rows="3" placeholder="Informations techniques, stack, contexte..."></textarea>
+          <textarea id="description" name="description" class="form-control" rows="3" placeholder="Informations techniques, stack, contexte..."><c:out value='${projetSaisi.descriptionTech}'/></textarea>
         </div>
 
       </div>
@@ -231,7 +232,7 @@
         <i data-lucide="x"></i>
       </button>
     </header>
-    <form id="delete-projet-form" action="${pageContext.request.contextPath}/projets" method="post">
+    <form id="delete-projet-form" action="${pageContext.request.contextPath}/admin/projets" method="post">
       <input type="hidden" name="formAction" value="delete" />
       <input type="hidden" name="projetId" id="delete-projet-id" />
       <div class="modal-body">
@@ -245,3 +246,15 @@
     </form>
   </div>
 </div>
+
+<c:if test="${not empty projetSaisi}">
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const modal = document.getElementById('projet-modal');
+      if (modal) {
+        modal.classList.add('is-visible');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+    });
+  </script>
+</c:if>

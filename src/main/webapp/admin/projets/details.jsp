@@ -2,7 +2,7 @@
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%
     request.setAttribute("pageTitle", "Détails du projet - EnvHub");
-    request.setAttribute("pageContent", "/WEB-INF/views/projets-details.jsp");
+    request.setAttribute("pageContent", "/WEB-INF/views/admin/projets-details.jsp");
     request.setAttribute("pageCss", "/assets/css/projets-details.css");
     request.setAttribute("pageJs", "/assets/js/projets-details.js");
 %>

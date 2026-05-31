@@ -1,4 +1,4 @@
-package controllers.publics;
+package controllers.pub;
 
 import dao.DemandeProjetDAO;
 import jakarta.servlet.ServletException;

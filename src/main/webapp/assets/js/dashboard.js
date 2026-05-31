@@ -18,7 +18,6 @@
   var logoutCancel = document.getElementById('logout-cancel');
   var logoutClose = document.querySelector('.modal-close');
 
-  /** Gestion de la Sidebar (Desktop & Mobile) */
   function initSidebar() {
     [sidebarToggle, mobileToggle].forEach(btn => {
       if (!btn) return;
@@ -28,7 +27,6 @@
     });
   }
 
-  /** Gestion du Menu Utilisateur (Dropdown) */
   function initUserMenu() {
     if (!userMenuTrigger || !userMenuDropdown) return;
     userMenuTrigger.addEventListener('click', function (e) {
@@ -37,14 +35,12 @@
     });
   }
 
-  /** Fermeture des menus au clic extérieur */
   function initClickOutside() {
     document.addEventListener('click', function () {
       if (userMenuDropdown) userMenuDropdown.classList.add('is-hidden');
     });
   }
 
-  /** Filtre de recherche visuel (si des éléments data-search existent) */
   function initSearch() {
     if (!searchInput) return;
     searchInput.addEventListener('input', function () {
@@ -55,12 +51,13 @@
       });
     });
   }
-  /** Rafraîchir les icônes Lucide après modification du DOM */
+
   window.refreshLucideIcons = function() {
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
   };
+
   function normalizePath(path) {
     var normalized = path.replace(/\/+$/, '');
     if (normalized === '') {
@@ -98,7 +95,6 @@
       updatePageHeading(title);
     }
 
-    // Ré-exécuter les scripts injectés via AJAX
     var scripts = pageContainer.querySelectorAll('script');
     scripts.forEach(function(oldScript) {
       var newScript = document.createElement('script');
@@ -111,7 +107,6 @@
       }
     });
 
-    // Rafraîchir les icônes Lucide après injection
     if (typeof window.refreshLucideIcons === 'function') {
       window.refreshLucideIcons();
     }
@@ -134,26 +129,16 @@
       return;
     }
 
-    fetch(url, {
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(function (response) {
-        if (!response.ok) {
-          throw new Error('Erreur de chargement');
-        }
+        if (!response.ok) throw new Error('Erreur de chargement');
         return response.text();
       })
       .then(function (text) {
         var data = extractPageFragment(text);
-        if (!data.html) {
-          throw new Error('Contenu introuvable');
-        }
+        if (!data.html) throw new Error('Contenu introuvable');
         setPageContent(data.html, data.title);
-        if (pushState) {
-          window.history.pushState({ url: url }, '', url);
-        }
+        if (pushState) window.history.pushState({ url: url }, '', url);
         updateActiveMenu(url);
         if (layoutRoot.classList.contains('is-sidebar-open')) {
           layoutRoot.classList.remove('is-sidebar-open');
@@ -164,15 +149,22 @@
       });
   }
 
+  /** CORRECTION : On saute l'AJAX pour le Dashboard afin de charger proprement Chart.js */
   function shouldSkipAjax(url) {
     var pathsToSkip = [
+      '/dashboard',
       '/admin/environnements',
       '/admin/demandes',
+      '/admin/projets',
       '/admin/utilisateurs',
       '/admin/serveurs',
       '/admin/technologies'
     ];
-    return pathsToSkip.some(function(path) {
+    
+    var urlObj = new URL(url);
+    var isHome = urlObj.pathname === '/' || urlObj.pathname.endsWith('/dashboard');
+    
+    return isHome || pathsToSkip.some(function(path) {
       return url.includes(path);
     });
   }
@@ -181,12 +173,8 @@
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(function (link) {
       if (!link.href) return;
       link.addEventListener('click', function (event) {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
-          return;
-        }
-        if (shouldSkipAjax(link.href)) {
-          return;
-        }
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        if (shouldSkipAjax(link.href)) return;
         event.preventDefault();
         loadPage(link.href, true);
       });
@@ -220,34 +208,17 @@
       openLogoutModal();
     });
 
-    if (logoutConfirm) {
-      logoutConfirm.addEventListener('click', function () {
-        logoutForm.submit();
-      });
-    }
-
-    if (logoutCancel) {
-      logoutCancel.addEventListener('click', closeLogoutModal);
-    }
-
-    if (logoutClose) {
-      logoutClose.addEventListener('click', closeLogoutModal);
-    }
-
+    if (logoutConfirm) logoutConfirm.addEventListener('click', function () { logoutForm.submit(); });
+    if (logoutCancel) logoutCancel.addEventListener('click', closeLogoutModal);
+    if (logoutClose) logoutClose.addEventListener('click', closeLogoutModal);
     logoutModal.addEventListener('click', function (event) {
-      if (event.target === logoutModal) {
-        closeLogoutModal();
-      }
+      if (event.target === logoutModal) closeLogoutModal();
     });
-
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
-        closeLogoutModal();
-      }
+      if (event.key === 'Escape') closeLogoutModal();
     });
   }
 
-  /** Toast Notifications */
   window.showToast = function (message, type = 'info') {
     var host = document.getElementById('toast-host');
     if (!host) return;
@@ -258,19 +229,14 @@
     setTimeout(() => toast.remove(), 3000);
   };
 
-  /** Initialisation */
   function init() {
     function renderLucideIcons() {
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
-    // Si Lucide est déjà chargé, l'utiliser immédiatement
     if (typeof lucide !== 'undefined') {
       renderLucideIcons();
     } else {
-      // Sinon, attendre que Lucide soit chargé
       window.addEventListener('lucideReady', renderLucideIcons);
     }
 

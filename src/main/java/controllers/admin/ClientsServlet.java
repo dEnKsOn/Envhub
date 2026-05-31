@@ -1,4 +1,4 @@
-package controllers;
+package controllers.admin;
 
 import dao.ClientDAO;
 import jakarta.servlet.ServletException;
@@ -12,7 +12,7 @@ import models.Client;
 import java.io.IOException;
 import java.util.UUID;
 
-@WebServlet("/clients")
+@WebServlet("/admin/clients")
 public class ClientsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -49,7 +49,7 @@ public class ClientsServlet extends HttpServlet {
             request.setAttribute("listeClients", clientDAO.findAll());
         }
 
-        request.getRequestDispatcher("/clients.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
     }
 
     @Override
@@ -72,11 +72,12 @@ public class ClientsServlet extends HttpServlet {
         String entreprise = request.getParameter("entreprise");
         String nom = request.getParameter("nom");
         String prenom = request.getParameter("prenom");
+        String emailClient = request.getParameter("emailClient"); // Récupération de l'email
 
         if (entreprise == null || entreprise.trim().isEmpty() || nom == null || nom.trim().isEmpty()) {
             request.setAttribute("erreur", "Les champs Entreprise et Nom du représentant sont obligatoires.");
             loadData(request);
-            request.getRequestDispatcher("/clients.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
             return;
         }
 
@@ -84,6 +85,8 @@ public class ClientsServlet extends HttpServlet {
         client.setEntrepriseClient(entreprise.trim());
         client.setNomClient(nom.trim());
         client.setPrenomClient(prenom != null && !prenom.trim().isEmpty() ? prenom.trim() : null);
+        // Ajout de l'email
+        client.setEmailClient(emailClient != null && !emailClient.trim().isEmpty() ? emailClient.trim() : null);
 
         // MODE UPDATE
         if ("update".equals(action) && clientId != null && !clientId.trim().isEmpty()) {
@@ -92,17 +95,17 @@ public class ClientsServlet extends HttpServlet {
             } catch (IllegalArgumentException e) {
                 request.setAttribute("erreur", "Identifiant de client invalide.");
                 loadData(request);
-                request.getRequestDispatcher("/clients.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
                 return;
             }
 
             boolean updated = clientDAO.update(client);
             if (updated) {
-                response.sendRedirect(request.getContextPath() + "/clients?success=true");
+                response.sendRedirect(request.getContextPath() + "/admin/clients?success=true");
             } else {
                 request.setAttribute("erreur", "Impossible de mettre à jour le client.");
                 loadData(request);
-                request.getRequestDispatcher("/clients.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
             }
             return;
         }
@@ -111,25 +114,25 @@ public class ClientsServlet extends HttpServlet {
         if ("create".equals(action) || action == null) {
             boolean saved = clientDAO.save(client);
             if (saved) {
-                response.sendRedirect(request.getContextPath() + "/clients?success=true");
+                response.sendRedirect(request.getContextPath() + "/admin/clients?success=true");
             } else {
                 request.setAttribute("erreur", "Impossible d'enregistrer le client.");
                 loadData(request);
-                request.getRequestDispatcher("/clients.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
             }
             return;
         }
 
         request.setAttribute("erreur", "Action non reconnue.");
         loadData(request);
-        request.getRequestDispatcher("/clients.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
     }
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response, String clientId) throws IOException, ServletException {
         if (clientId == null || clientId.trim().isEmpty()) {
             request.setAttribute("erreur", "Client introuvable pour suppression.");
             loadData(request);
-            request.getRequestDispatcher("/clients.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
             return;
         }
 
@@ -137,16 +140,16 @@ public class ClientsServlet extends HttpServlet {
             UUID uuid = UUID.fromString(clientId);
             boolean deleted = clientDAO.delete(uuid);
             if (deleted) {
-                response.sendRedirect(request.getContextPath() + "/clients?success=true");
+                response.sendRedirect(request.getContextPath() + "/admin/clients?success=true");
             } else {
-                request.setAttribute("erreur", "Impossible de supprimer le client. Des projets y sont probablement rattachés (Contrainte de clé étrangère).");
+                request.setAttribute("erreur", "Impossible de supprimer le client. Des projets y sont probablement rattachés.");
                 loadData(request);
-                request.getRequestDispatcher("/clients.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
             }
         } catch (IllegalArgumentException e) {
             request.setAttribute("erreur", "Identifiant de client invalide pour suppression.");
             loadData(request);
-            request.getRequestDispatcher("/clients.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/clients.jsp").forward(request, response);
         }
     }
 

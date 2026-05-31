@@ -3,5 +3,7 @@
 <%
     request.setAttribute("pageTitle", "Tableau de bord - EnvHub");
     request.setAttribute("pageContent", "/WEB-INF/views/admin/dashboard-stats.jsp");
+    request.setAttribute("pageCss", "/assets/css/dashboard-stats.css"); 
+    request.setAttribute("pageJs", "/assets/js/dashboard.js");
 %>
 <jsp:include page="/WEB-INF/views/base_layout.jsp" />

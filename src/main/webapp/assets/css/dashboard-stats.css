@@ -1,0 +1,307 @@
+/**
+ * dashboard-stats.css
+ * Styles premium pour le tableau de bord principal EnvHub
+ */
+
+/* =========================================
+   1. LAYOUTS EN GRILLE & RESPONSIVITÉ
+   ========================================= */
+   .dashboard-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .dashboard-layout-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  
+  /* Responsivité Tablette */
+  @media (max-width: 1200px) {
+    .dashboard-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  /* Responsivité Mobile */
+  @media (max-width: 1024px) {
+    .dashboard-layout-main { grid-template-columns: 1fr; }
+  }
+  
+  @media (max-width: 640px) {
+    .dashboard-grid-4 { grid-template-columns: 1fr; }
+  }
+  
+  /* =========================================
+     2. NOUVELLES CARTES KPI (SaaS Moderne)
+     ========================================= */
+  .kpi-card-modern {
+    background: var(--bg-surface, #FFFFFF);
+    border-radius: 16px; 
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: 0 2px 4px rgba(12, 22, 37, 0.02), 0 4px 6px rgba(12, 22, 37, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  
+  .kpi-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(12, 22, 37, 0.08), 0 8px 10px -6px rgba(12, 22, 37, 0.04);
+    border-color: #CBD5E1;
+  }
+  
+  .kpi-body {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+  }
+  
+  .kpi-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+  
+  .kpi-card-modern:hover .kpi-icon-box {
+    transform: scale(1.05); 
+  }
+  
+  .kpi-icon-box i {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .kpi-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .kpi-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 4px 0;
+  }
+  
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.1;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .kpi-subtitle {
+    font-size: 0.8rem;
+    color: #94A3B8;
+    font-weight: 500;
+    margin: 4px 0 0 0;
+  }
+  
+  /* Couleurs pastels */
+  .icon-amber { background: #FEF3C7; color: #D97706; }
+  .icon-blue { background: #DBEAFE; color: #2563EB; }
+  .icon-indigo { background: #E0E7FF; color: #4F46E5; }
+  .icon-emerald { background: #D1FAE5; color: #059669; }
+  
+  /* =========================================
+     3. BARRE DE PROGRESSION PREMIUM
+     ========================================= */
+  .progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .progress-track {
+    flex-grow: 1;
+    height: 8px;
+    background: #F1F5F9;
+    border-radius: 99px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05); 
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--primary, #3B82F6) 0%, #60A5FA 100%);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3); 
+    transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
+  }
+  
+  .progress-fill[style*="width: 100"] {
+    background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+  }
+  
+  .progress-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    min-width: 36px;
+    color: var(--text-main);
+    text-align: right;
+    font-variant-numeric: tabular-nums; 
+  }
+  
+  /* =========================================
+     4. STYLES DU TABLEAU (Projets Récents)
+     ========================================= */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background: #FAFAFA;
+    padding: 14px 24px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    border-bottom: 1px solid #E2E8F0;
+    text-align: left;
+  }
+  
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 0.9rem;
+    color: #0F172A;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+  }
+  
+  .data-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  
+  .data-table tbody tr:hover {
+    background-color: #F8FAFC;
+  }
+  
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #F1F5F9;
+    color: #64748B;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .btn-icon:hover {
+    background: var(--primary, #3B82F6);
+    color: #FFFFFF;
+  }
+  
+  .btn-icon i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* =========================================
+     5. GRAPHIQUE ET TIMELINE
+     ========================================= */
+  .chart-legend {
+    border-top: 1px solid var(--border-light);
+    background: #FAFAFA;
+    padding: 16px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .chart-legend span {
+    font-size: 1rem;
+    margin-right: 4px;
+  }
+  
+  .timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    border-left: 2px solid #E2E8F0;
+    margin-left: 14px;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding-left: 28px;
+    padding-bottom: 24px;
+  }
+  
+  .timeline-item:last-child {
+    padding-bottom: 8px;
+    border-left-color: transparent;
+  }
+  
+  .timeline-dot {
+    position: absolute;
+    left: -5px; 
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary, #3B82F6);
+    box-shadow: 0 0 0 4px var(--bg-surface, #fff), 0 0 0 8px rgba(59, 130, 246, 0.15);
+  }
+  
+  .timeline-item:first-child .timeline-dot {
+    background: #10B981;
+    box-shadow: 0 0 0 4px var(--bg-surface, #fff), 0 0 0 8px rgba(16, 185, 129, 0.15);
+  }
+  
+  .timeline-desc {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+    margin: 0 0 6px 0;
+    line-height: 1.5;
+  }
+  
+  .timeline-date {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+  
+  .timeline-date i {
+    width: 14px;
+    height: 14px;
+  }

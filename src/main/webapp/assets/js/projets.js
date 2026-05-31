@@ -1,4 +1,3 @@
-// --- Initialisation locale (s'exécute à chaque chargement) ---
 (function initProjetsLocal() {
     const searchInput = document.getElementById('search-input');
     const searchForm = document.getElementById('search-form');
@@ -42,7 +41,6 @@
     }
   })();
   
-  // Gestion des événements via délégation pour supporter le chargement AJAX
   if (!window.projetsJsInitialized) {
     window.projetsJsInitialized = true;
   
@@ -188,7 +186,6 @@
     });
   }
   
-  // Rafraîchir les icônes
   if (typeof window.refreshLucideIcons === 'function') {
     window.refreshLucideIcons();
   } else if (typeof lucide !== 'undefined') {

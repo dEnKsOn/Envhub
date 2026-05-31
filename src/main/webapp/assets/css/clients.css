@@ -3,18 +3,12 @@
  * Aligné sur login.css et le layout global
  */
 
-/* =========================================
-   1. VARIABLES DE PORTÉE LOCALE (Sync Login)
-   ========================================= */
-:root {
+ :root {
   --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
   --focus-glow: 0 0 0 3px rgba(100, 116, 139, 0.15);
   --bg-input: #FAFAF9;
 }
 
-/* =========================================
-   2. RECHERCHE ET FILTRES
-   ========================================= */
 .search-form {
   display: flex;
   gap: 12px;
@@ -41,9 +35,6 @@
   box-shadow: var(--focus-ring);
 }
 
-/* =========================================
-   3. TABLEAU DES CLIENTS (Minimaliste)
-   ========================================= */
 .table-responsive {
   background: var(--bg-surface);
   border-radius: var(--radius-md);
@@ -85,15 +76,11 @@
   border-bottom: none;
 }
 
-/* Styles pour les noms en majuscules/capitales */
 .text-capitalize {
   text-transform: capitalize;
   font-weight: 500;
 }
 
-/* =========================================
-   4. BADGES ET COMPOSANTS DE LIGNE
-   ========================================= */
 .badge-outline {
   display: inline-flex;
   align-items: center;
@@ -107,20 +94,6 @@
   color: var(--accent);
 }
 
-.avatar-sm {
-  width: 32px;
-  height: 32px;
-  background: var(--border-light);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-}
-
-/* =========================================
-   5. MODALES SPÉCIFIQUES & ICÔNES
-   ========================================= */
 #client-modal .modal-card {
   width: min(600px, 95vw);
 }
@@ -179,9 +152,6 @@
   width: 100%;
 }
 
-/* =========================================
-   6. ÉLÉMENTS DE FORMULAIRE (Style Login)
-   ========================================= */
 .form-group label {
   color: #324155;
   font-weight: 500;
@@ -208,9 +178,6 @@
   box-shadow: var(--focus-ring);
 }
 
-/* =========================================
-   7. ALERTES ET MESSAGES
-   ========================================= */
 .alert {
   border-radius: 8px;
   padding: 16px;
@@ -237,9 +204,6 @@
   align-items: center;
 }
 
-/* =========================================
-   8. UTILITAIRES DE TEXTE
-   ========================================= */
 .text-right { text-align: right; }
 .text-red-500 { color: var(--danger); }
 .text-xs { font-size: 0.75rem; }

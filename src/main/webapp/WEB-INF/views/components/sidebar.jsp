@@ -20,7 +20,7 @@
         <span>Dashboard</span>
       </a>
       
-      <a href="${pageContext.request.contextPath}/projets" class="nav-item ${pageContext.request.requestURI.contains('projets') ? 'is-active' : ''}">
+      <a href="${pageContext.request.contextPath}/admin/projets" class="nav-item ${pageContext.request.requestURI.contains('projets') ? 'is-active' : ''}">
         <i data-lucide="folder-open"></i>
         <span>Projets</span>
       </a>
@@ -46,7 +46,7 @@
         <span>Utilisateurs</span>
       </a>
 
-      <a href="${pageContext.request.contextPath}/clients" class="nav-item ${pageContext.request.requestURI.contains('clients') ? 'is-active' : ''}">
+      <a href="${pageContext.request.contextPath}/admin/clients" class="nav-item ${pageContext.request.requestURI.contains('clients') ? 'is-active' : ''}">
         <i data-lucide="briefcase"></i>
         <span>Clients</span>
       </a>

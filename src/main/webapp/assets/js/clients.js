@@ -137,7 +137,7 @@ if (!window.clientsJsInitialized) {
         entreprise: btnEdit.dataset.entreprise,
         nom: btnEdit.dataset.nom,
         prenom: btnEdit.dataset.prenom,
-        emailClient: btnEdit.dataset.emailClient
+        emailClient: btnEdit.dataset.emailClient // Correspond au data-email-client en HTML
       });
       return;
     }

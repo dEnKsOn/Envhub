@@ -3,7 +3,6 @@
 <%
     request.setAttribute("pageTitle", "Demandes Clients - EnvHub");
     request.setAttribute("pageContent", "/WEB-INF/views/admin/demandes.jsp");
-
     request.setAttribute("pageCss", "/assets/css/demandes.css"); 
     request.setAttribute("pageJs", "/assets/js/demandes.js");
 %>
