@@ -1,20 +1,22 @@
 /* ---------------------------------------------------- */
-/* Projet      : EnvHub - Système de Gestion           */
-/* Auteur      : Kossi Jubilee DENOU                   */
-/* SGBD        : MySQL                                  */
+/* Projet      : EnvHub - Système de Gestion            */
+/* Auteur      : Kossi Jubilee DENOU                    */
+/* SGBD        : MySQL / MariaDB                        */
+/* Description : Création complète (Table)              */
 /* ---------------------------------------------------- */
 
 SET FOREIGN_KEY_CHECKS=0; 
 
-CREATE DATABASE IF NOT EXISTS `EnvHub` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS `EnvHub` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
 
-SET NAMES 'utf8mb4';
+SET NAMES utf8mb4;
 USE `EnvHub`;
 
 /* ==================================================== */
-/* SUPPRESSION DES TABLES EXISTANTES                    */
+/* 1. SUPPRESSION DES TABLES EXISTANTES                 */
 /* ==================================================== */
 
+DROP TABLE IF EXISTS `Audit_Environnement` CASCADE;
 DROP TABLE IF EXISTS `VersionTechno` CASCADE;
 DROP TABLE IF EXISTS `Affectation` CASCADE;
 DROP TABLE IF EXISTS `Environnement` CASCADE;
@@ -24,9 +26,10 @@ DROP TABLE IF EXISTS `Projet` CASCADE;
 DROP TABLE IF EXISTS `Client` CASCADE;
 DROP TABLE IF EXISTS `Utilisateur` CASCADE;
 DROP TABLE IF EXISTS `Profil` CASCADE;
+DROP TABLE IF EXISTS `DemandeProjet` CASCADE;
 
 /* ==================================================== */
-/* CRÉATION DES TABLES (AVEC TYPES OPTIMISÉS)           */
+/* 2. CRÉATION DES TABLES                               */
 /* ==================================================== */
 
 CREATE TABLE `Profil`
@@ -41,7 +44,7 @@ CREATE TABLE `Utilisateur`
     `idUser` CHAR(36) NOT NULL,
     `nomUser` VARCHAR(50) NOT NULL,
     `prenomUser` VARCHAR(50) NOT NULL,
-    `genre` VARCHAR(10) NULL, /* Ajout de l'attribut manquant */
+    `genre` VARCHAR(10) NULL,
     `email` VARCHAR(100) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `idProfil` INT NOT NULL,
@@ -52,9 +55,9 @@ CREATE TABLE `Client`
 (
     `idClient` CHAR(36) NOT NULL,
     `nomClient` VARCHAR(100) NOT NULL,
-    `prenomClient` VARCHAR(100) NULL, /* Ajout de l'attribut manquant */
+    `prenomClient` VARCHAR(100) NULL,
     `entrepriseClient` VARCHAR(100) NOT NULL,
-    `emailClient` VARCHAR(100) NULL, /* Ajout de l'attribut manquant */
+    `emailClient` VARCHAR(100) NULL,
     CONSTRAINT `PK_Client` PRIMARY KEY (`idClient`)
 );
 
@@ -62,14 +65,14 @@ CREATE TABLE `Projet`
 (
     `idProjet` CHAR(36) NOT NULL,
     `nomProjet` VARCHAR(100) NOT NULL,
-    `descriptionTech` TEXT NOT NULL, /* TEXT pour les longues descriptions */
+    `descriptionTech` TEXT NOT NULL,
     `dateLancement` DATE NOT NULL,
     `dateLivraisonEstimee` DATE NULL,
     `statutProjet` ENUM('EN_COURS', 'EN_PAUSE', 'LIVRE', 'ANNULE') NOT NULL DEFAULT 'EN_COURS',
-    `pourcentageAvancement` INT DEFAULT 0, /* Ajout de l'attribut manquant */
+    `pourcentageAvancement` INT DEFAULT 0,
     `idClient` CHAR(36) NOT NULL,
     CONSTRAINT `PK_Projet` PRIMARY KEY (`idProjet`),
-    CONSTRAINT `UQ_NomProjet_Client` UNIQUE (`nomProjet`, `idClient`) /* Empêche les doublons pour un même client */
+    CONSTRAINT `UQ_NomProjet_Client` UNIQUE (`nomProjet`, `idClient`)
 );
 
 CREATE TABLE `Serveur`
@@ -82,6 +85,7 @@ CREATE TABLE `Serveur`
     `fournisseur` VARCHAR(100) NULL,        
     CONSTRAINT `PK_Serveur` PRIMARY KEY (`idServ`)
 );
+
 CREATE TABLE `Environnement`
 (
     `idEnv` CHAR(36) NOT NULL,
@@ -90,8 +94,10 @@ CREATE TABLE `Environnement`
     `urlFront` VARCHAR(255) NULL,
     `urlBack` VARCHAR(255) NULL,
     `notes` TEXT NULL,
+    `idCreator` CHAR(36) NOT NULL,
+    `dateCreation` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `idProjet` CHAR(36) NOT NULL,
-    `idServ` CHAR(36) NULL, /* NULL autorisé au cas où on prépare l'environnement avant d'avoir le serveur */
+    `idServ` CHAR(36) NULL, 
     CONSTRAINT `PK_Environnement` PRIMARY KEY (`idEnv`)
 );
 
@@ -102,8 +108,6 @@ CREATE TABLE `Technologie`
     `typeTechno` ENUM('LANGAGE', 'FRAMEWORK', 'SGBD') NOT NULL,
     CONSTRAINT `PK_Technologie` PRIMARY KEY (`idTechno`)
 );
-
-/* --- Tables de jointure (avec Clés Primaires Composites) --- */
 
 CREATE TABLE `Affectation`
 (
@@ -129,86 +133,73 @@ CREATE TABLE `DemandeProjet`
     `entrepriseClient` VARCHAR(100) NULL,
     `titreProjet` VARCHAR(150) NOT NULL,
     `descriptionBesoin` TEXT NOT NULL,
-    `budgetEstime` DECIMAL(10,2) NULL, /* Optionnel : Utile pour évaluer la faisabilité */
+    `budgetEstime` DECIMAL(10,2) NULL,
     `dateSoumission` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `statutDemande` ENUM('EN_ATTENTE', 'ACCEPTE', 'REJETE') NOT NULL DEFAULT 'EN_ATTENTE',
-    `dateTraitement` DATETIME NULL, /* Pour tracer quand l'Admin a pris la décision */
+    `dateTraitement` DATETIME NULL,
     CONSTRAINT `PK_DemandeProjet` PRIMARY KEY (`idDemande`)
+);
+
+CREATE TABLE `Audit_Environnement` 
+(
+    `idAudit` INT AUTO_INCREMENT PRIMARY KEY,
+    `idEnv` CHAR(36) NOT NULL,
+    `action` VARCHAR(10) NOT NULL,
+    `dateModif` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `ancienne_urlFront` VARCHAR(255),
+    `nouvelle_urlFront` VARCHAR(255),
+    `ancienne_urlBack` VARCHAR(255),
+    `nouvelle_urlBack` VARCHAR(255),
+    `idUserModif` CHAR(36) 
 );
 
 
 /* ==================================================== */
-/* CONTRAINTES DE CLÉS ÉTRANGÈRES ET CYCLE DE VIE       */
+/* 3. CONTRAINTES DE CLÉS ÉTRANGÈRES                    */
 /* ==================================================== */
 
-/* Utilisateur -> Profil */
 ALTER TABLE `Utilisateur` 
- ADD CONSTRAINT `FK_Utilisateur_Profil`
-    FOREIGN KEY (`idProfil`) REFERENCES `Profil` (`idProfil`) 
-    ON DELETE RESTRICT ON UPDATE CASCADE;
+ ADD CONSTRAINT `FK_Utilisateur_Profil` FOREIGN KEY (`idProfil`) REFERENCES `Profil` (`idProfil`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-/* Projet -> Client */
 ALTER TABLE `Projet` 
- ADD CONSTRAINT `FK_Projet_Client`
-    FOREIGN KEY (`idClient`) REFERENCES `Client` (`idClient`) 
-    ON DELETE RESTRICT ON UPDATE CASCADE;
+ ADD CONSTRAINT `FK_Projet_Client` FOREIGN KEY (`idClient`) REFERENCES `Client` (`idClient`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-/* Environnement -> Projet (COMPOSITION : Suppression en cascade) */
+/* Cles étrangères pour l'Environnement (Corrigées) */
 ALTER TABLE `Environnement` 
- ADD CONSTRAINT `FK_Environnement_Projet`
-    FOREIGN KEY (`idProjet`) REFERENCES `Projet` (`idProjet`) 
-    ON DELETE CASCADE ON UPDATE CASCADE;
-
-/* Environnement -> Serveur (ASSOCIATION SIMPLE / AGRÉGATION : Protection) */
-ALTER TABLE `Environnement` 
- ADD CONSTRAINT `FK_Environnement_Serveur`
-    FOREIGN KEY (`idServ`) REFERENCES `Serveur` (`idServ`) 
-    ON DELETE RESTRICT ON UPDATE CASCADE;
-
-/* Affectation (Projet + Utilisateur) */
-ALTER TABLE `Affectation` 
- ADD CONSTRAINT `FK_Affectation_Projet`
-    FOREIGN KEY (`idProjet`) REFERENCES `Projet` (`idProjet`) 
-    ON DELETE CASCADE ON UPDATE CASCADE;
+ ADD CONSTRAINT `FK_Environnement_Utilisateur` FOREIGN KEY (`idCreator`) REFERENCES `Utilisateur` (`idUser`) ON DELETE CASCADE ON UPDATE CASCADE,
+ ADD CONSTRAINT `FK_Environnement_Projet` FOREIGN KEY (`idProjet`) REFERENCES `Projet` (`idProjet`) ON DELETE CASCADE ON UPDATE CASCADE,
+ ADD CONSTRAINT `FK_Environnement_Serveur` FOREIGN KEY (`idServ`) REFERENCES `Serveur` (`idServ`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 ALTER TABLE `Affectation` 
- ADD CONSTRAINT `FK_Affectation_Utilisateur`
-    FOREIGN KEY (`idUser`) REFERENCES `Utilisateur` (`idUser`) 
-    ON DELETE CASCADE ON UPDATE CASCADE;
-
-/* VersionTechno (Environnement + Technologie) */
-ALTER TABLE `VersionTechno` 
- ADD CONSTRAINT `FK_VersionTechno_Environnement`
-    FOREIGN KEY (`idEnv`) REFERENCES `Environnement` (`idEnv`) 
-    ON DELETE CASCADE ON UPDATE CASCADE;
+ ADD CONSTRAINT `FK_Affectation_Projet` FOREIGN KEY (`idProjet`) REFERENCES `Projet` (`idProjet`) ON DELETE CASCADE ON UPDATE CASCADE,
+ ADD CONSTRAINT `FK_Affectation_Utilisateur` FOREIGN KEY (`idUser`) REFERENCES `Utilisateur` (`idUser`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `VersionTechno` 
- ADD CONSTRAINT `FK_VersionTechno_Technologie`
-    FOREIGN KEY (`idTechno`) REFERENCES `Technologie` (`idTechno`) 
-    ON DELETE RESTRICT ON UPDATE CASCADE;
+ ADD CONSTRAINT `FK_VersionTechno_Environnement` FOREIGN KEY (`idEnv`) REFERENCES `Environnement` (`idEnv`) ON DELETE CASCADE ON UPDATE CASCADE,
+ ADD CONSTRAINT `FK_VersionTechno_Technologie` FOREIGN KEY (`idTechno`) REFERENCES `Technologie` (`idTechno`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 SET FOREIGN_KEY_CHECKS=1;
 
--- Démarrage d'une transaction pour garantir l'atomicité de l'opération
+/* ==================================================== */
+/* 4. INSERTION INITIALE (JEU DE DONNÉES DE DÉPART)     */
+/* ==================================================== */
+
 START TRANSACTION;
 
--- 1. Insertion du rôle Administrateur dans la table Profil
 INSERT INTO `Profil` (libelle) VALUES ('Développeur');
 INSERT INTO `Profil` (libelle) VALUES ('Administrateur');
 
--- 2. Récupération de l'ID auto-incrémenté généré pour ce profil
 SET @adminProfilId = LAST_INSERT_ID();
 
--- 3. Insertion de l'utilisateur Administrateur
-INSERT INTO Utilisateur (idUser, nomUser, prenomUser,genre ,email, password, idProfil)
+INSERT INTO `Utilisateur` (idUser, nomUser, prenomUser, genre, email, password, idProfil)
 VALUES (
-    UUID(),                                                      -- Génération native de l'UUID
+    UUID(),                                                      
     'DENOU',
     'Jubilee',
     'Masculin',
-    'jub@envhub.ma',                                          -- Email d'authentification
-    '$2a$10$Cvc7n4QJ0wHPbqMNxbzmSujbW4qOwrZkR4iW/QDS3XFO0fsxasgCK',  -- Remplacer par un vrai hash BCrypt/Argon2
-    @adminProfilId                                               -- Liaison avec la table Profil
+    'jub@envhub.ma',                                          
+    '$2a$10$Cvc7n4QJ0wHPbqMNxbzmSujbW4qOwrZkR4iW/QDS3XFO0fsxasgCK',  
+    @adminProfilId                                               
 );
 
 COMMIT;

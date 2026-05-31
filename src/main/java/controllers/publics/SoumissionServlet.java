@@ -85,7 +85,7 @@ public class SoumissionServlet extends HttpServlet {
                 + "<p>Nous vous confirmons la bonne réception de votre demande concernant le projet : <strong>" + demande.getTitreProjet() + "</strong>.</p>"
                 + "<p>Notre équipe technique est en train d'analyser votre cahier des charges afin d'évaluer la faisabilité et les ressources nécessaires pour votre infrastructure.</p>"
                 + "<p style=\"padding: 10px; background-color: #f0fdf4; border-left: 4px solid #166534; margin: 20px 0;\">"
-                + "⏳ <strong>Délai de traitement :</strong> Nous reviendrons vers vous avec une réponse détaillée sous <strong>48 heures</strong>."
+                + "<strong>Délai de traitement :</strong> Nous reviendrons vers vous avec une réponse détaillée sous <strong>48 heures</strong>."
                 + "</p>"
                 + "<p>Nous vous remercions de l'intérêt que vous portez à nos services.</p>"
                 + "<p>Cordialement,<br><strong>L'équipe EnvHub</strong></p>"

@@ -25,7 +25,9 @@
         <span>Projets</span>
       </a>
       
-      <a href="${pageContext.request.contextPath}/environnements" class="nav-item ${pageContext.request.requestURI.contains('environnements') ? 'is-active' : ''}">
+      <a href="${pageContext.request.contextPath}/admin/environnements" 
+        onclick="window.location.href=this.href; event.stopPropagation(); return false;"
+        class="nav-item ${pageContext.request.requestURI.contains('admin/environnements') ? 'is-active' : ''}">
         <i data-lucide="network"></i>
         <span>Environnements</span>
       </a>
