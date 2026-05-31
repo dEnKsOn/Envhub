@@ -1,0 +1,332 @@
+/**
+ * environnements.css — Cohérence Visuelle EnvHub
+ * Aligné sur clients.css et le layout global
+ */
+
+/* =========================================
+   1. VARIABLES DE PORTÉE LOCALE (Sync Clients/Login)
+   ========================================= */
+   :root {
+    --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
+    --focus-glow: 0 0 0 3px rgba(100, 116, 139, 0.15);
+    --bg-input: #FAFAF9;
+  }
+  
+  /* =========================================
+     2. EN-TÊTE DE PAGE
+     ========================================= */
+  .page-header {
+    margin-bottom: 24px;
+  }
+  
+  .section-title {
+    font-family: var(--font-heading, 'Inknut Antiqua', serif);
+    font-size: 1.75rem;
+    color: var(--text-main);
+    margin: 0 0 4px 0;
+  }
+  
+  .text-muted {
+    color: var(--text-muted, #64748B);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  
+  /* =========================================
+     3. PANNEAU DE FILTRES (Basé sur .search-form de clients.css)
+     ========================================= */
+  .filters-panel {
+    display: flex;
+    gap: 12px;
+    background: var(--bg-surface, #FFFFFF);
+    padding: 16px;
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: var(--shadow-tech);
+    margin-bottom: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  /* Identique à .input-with-icon de clients.css */
+  .filter-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 220px;
+  }
+  
+  .filter-group i,
+  .filter-group svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+  
+  /* Identique à .form-control de clients.css */
+  .filter-select {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-light, #E2E8F0);
+    border-radius: 8px;
+    padding: 12px 16px 12px 42px; /* 42px pour laisser la place à l'icône */
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    font-family: 'Satoshi', sans-serif;
+    color: var(--text-main, #0C1625);
+    appearance: none;
+    cursor: pointer;
+  }
+  
+  .filter-select:focus {
+    border-color: var(--primary, #324155);
+    background-color: var(--bg-surface, #FFFFFF);
+    box-shadow: var(--focus-glow);
+  }
+  
+  #btn-reset-filters {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: 'Satoshi', sans-serif;
+    background: var(--bg-surface, #FFFFFF);
+    border: 1.5px solid var(--border-light, #E2E8F0);
+    color: var(--text-main);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  #btn-reset-filters:hover {
+    background: rgba(241, 245, 249, 0.5);
+    border-color: #CBD5E1;
+  }
+  
+  /* =========================================
+     4. TABLEAU (Copie exacte de clients.css)
+     ========================================= */
+  .table-card {
+    margin-bottom: 32px;
+  }
+  
+  .table-responsive {
+    background: var(--bg-surface, #FFFFFF);
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: var(--shadow-tech);
+    overflow: hidden;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background: #FAFAFA;
+    padding: 14px 24px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted, #64748B);
+    border-bottom: 1.5px solid var(--border-light, #E2E8F0);
+    text-align: left;
+  }
+  
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 0.9rem;
+    color: var(--text-main, #0C1625);
+    border-bottom: 1px solid var(--border-light, #E2E8F0);
+    vertical-align: middle;
+  }
+  
+  .data-table tbody tr:hover {
+    background-color: rgba(241, 245, 249, 0.5);
+  }
+  
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* =========================================
+     5. BADGES ET ÉLÉMENTS INTERNES (Style Environnements)
+     ========================================= */
+  /* Aligné sur le design "badge-outline" de clients.css */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  
+  .badge-prod { background: #F0FDF4; color: #166534; border: 1px solid rgba(22, 101, 52, 0.2); }
+  .badge-staging { background: #FFF7ED; color: #9A3412; border: 1px solid rgba(154, 52, 18, 0.2); }
+  .badge-dev { background: #F0F9FF; color: #0369A1; border: 1px solid rgba(3, 105, 161, 0.2); }
+  .badge-local { background: #F8FAFC; color: #475569; border: 1px solid rgba(71, 85, 105, 0.2); }
+  
+  .project-link {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+  
+  .project-link:hover {
+    color: var(--primary, #324155);
+    text-decoration: underline;
+  }
+  
+  /* Composants techniques */
+  .tech-info, .trace-info { display: flex; flex-direction: column; gap: 4px; }
+  
+  .font-mono {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    background: var(--bg-input);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
+    width: fit-content;
+  }
+  
+  .db-name { font-size: 0.9rem; font-weight: 500; }
+  .text-xs { font-size: 0.75rem; }
+  
+  .urls-mini { display: flex; gap: 6px; }
+  .urls-mini span {
+    font-size: 0.7rem;
+    background: #FAFAFA;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
+    font-weight: 600;
+  }
+  
+  .trace-author { font-weight: 600; font-size: 0.9rem; color: var(--text-main); text-transform: capitalize; }
+  .trace-date { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-muted); }
+  .trace-date i { width: 14px; height: 14px; }
+  
+  /* Boutons Actions (Style icon-button standardisé) */
+  .actions-flex { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-icon {
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-light);
+    color: var(--text-muted);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .btn-icon:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--primary);
+  }
+  .btn-icon i { width: 16px; height: 16px; }
+  
+  /* =========================================
+     6. MODALE (Basé sur #client-modal de clients.css)
+     ========================================= */
+  .modal-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(12, 22, 37, 0.5); backdrop-filter: blur(4px); 
+    display: flex; align-items: center; justify-content: center; 
+    z-index: 1000; opacity: 0; visibility: hidden; pointer-events: none;
+    transition: all 0.3s ease; 
+  }
+  .modal-overlay.is-visible { opacity: 1; visibility: visible; pointer-events: auto; }
+  
+  .modal-card {
+    background: var(--bg-surface, #FFFFFF);
+    border-radius: 12px;
+    width: min(600px, 95vw); /* Taille exacte issue de clients.css */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border-light);
+  }
+  .modal-overlay.is-visible .modal-card { transform: translateY(0); }
+  
+  /* Header de la Modale aligné sur clients.css */
+  .modal-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .modal-header-content {
+    display: flex;
+    align-items: center;
+  }
+  
+  .modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: rgba(100, 116, 139, 0.1);
+    color: #0C1625;
+    border-radius: 12px;
+    margin-right: 16px;
+  }
+  
+  .modal-header-text h3 { margin: 0; font-size: 1.25rem; color: var(--text-main); line-height: 1.2; }
+  .modal-header-text p { margin: 0; font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+  
+  .modal-close {
+    background: none; border: none; color: #94A3B8; cursor: pointer;
+    padding: 6px; border-radius: 6px; transition: all 0.2s;
+  }
+  .modal-close:hover { background: #FEF2F2; color: #B91C1C; }
+  
+  /* Contenu de la Modale */
+  .modal-body { padding: 24px; }
+  
+  .config-item { margin-bottom: 16px; }
+  .config-label {
+    display: block; font-size: 0.75rem; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  
+  .copy-box {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg-input); border: 1.5px solid var(--border-light);
+    padding: 12px 16px; border-radius: 8px; transition: border-color 0.2s ease;
+  }
+  .copy-box:hover { border-color: #CBD5E1; }
+  
+  .btn-copy { background: none; border: none; color: #94A3B8; cursor: pointer; transition: color 0.2s; }
+  .btn-copy:hover { color: var(--primary); }
+  
+  .notes-box {
+    background: #FFFBEB; border-left: 4px solid #F59E0B;
+    padding: 16px; font-size: 0.9rem; color: #92400E;
+    border-radius: 0 8px 8px 0; white-space: pre-wrap;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+  .mt-4 { margin-top: 24px; }

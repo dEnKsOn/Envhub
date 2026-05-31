@@ -1,35 +1,19 @@
 /* ---------------------------------------------------- */
-/* Projet      : EnvHub - Script des Triggers           */
-/* Auteur      : Kossi Jubilee DENOU                    */
-/* SGBD        : MySQL (Docker Compatible)              */
+/* Projet      : EnvHub - Script isolé des Triggers     */
+/* SGBD        : MySQL / MariaDB                        */
 /* ---------------------------------------------------- */
 
 USE `EnvHub`;
 
-/* ==================================================== */
-/* 0. PRÉPARATION : TABLE D'AUDIT                       */
-/* ==================================================== */
-
-CREATE TABLE IF NOT EXISTS `Audit_Environnement` (
-    `idAudit` INT AUTO_INCREMENT PRIMARY KEY,
-    `idEnv` CHAR(36) NOT NULL,
-    `action` VARCHAR(10) NOT NULL, -- UPDATE, DELETE
-    `dateModif` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `ancienne_urlFront` VARCHAR(255),
-    `nouvelle_urlFront` VARCHAR(255),
-    `ancienne_urlBack` VARCHAR(255),
-    `nouvelle_urlBack` VARCHAR(255),
-    `idUserModif` CHAR(36) -- Optionnel : pour tracer qui a fait quoi
-);
-
--- On ouvre le délimiteur spécial UNE SEULE FOIS ici
+-- On change le délimiteur pour pouvoir écrire des blocs d'instructions (BEGIN ... END)
 DELIMITER $$
 
 /* ==================================================== */
-/* 1. RÈGLES MÉTIER (INTÉGRITÉ)                         */
+/* 1. RÈGLES MÉTIER (INTÉGRITÉ & SÉCURITÉ)              */
 /* ==================================================== */
 
--- Unicité de l'environnement de Production (Insertion)
+-- 1.1 Unicité de l'environnement de Production (Insertion)
+DROP TRIGGER IF EXISTS trg_check_single_production_insert$$
 CREATE TRIGGER trg_check_single_production_insert
 BEFORE INSERT ON `Environnement`
 FOR EACH ROW
@@ -44,7 +28,8 @@ BEGIN
     END IF;
 END$$
 
--- Unicité de l'environnement de Production (Mise à jour)
+-- 1.2 Unicité de l'environnement de Production (Mise à jour)
+DROP TRIGGER IF EXISTS trg_check_single_production_update$$
 CREATE TRIGGER trg_check_single_production_update
 BEFORE UPDATE ON `Environnement`
 FOR EACH ROW
@@ -59,7 +44,8 @@ BEGIN
     END IF;
 END$$
 
--- Cohérence chronologique des dates
+-- 1.3 Cohérence chronologique des dates
+DROP TRIGGER IF EXISTS trg_check_dates_projet$$
 CREATE TRIGGER trg_check_dates_projet
 BEFORE INSERT ON `Projet`
 FOR EACH ROW
@@ -69,7 +55,8 @@ BEGIN
     END IF;
 END$$
 
--- Limite d'un seul Chef de Projet
+-- 1.4 Limite d'un seul Chef de Projet
+DROP TRIGGER IF EXISTS trg_limite_chef_projet_insert$$
 CREATE TRIGGER trg_limite_chef_projet_insert
 BEFORE INSERT ON `Affectation`
 FOR EACH ROW
@@ -88,108 +75,25 @@ BEGIN
     END IF;
 END$$
 
--- Sécurité Infrastructure : Pas de production sur un serveur avec moins de 4Go de RAM
+-- 1.5 Sécurité Infrastructure : Pas de production sur un serveur avec moins de 4Go de RAM
+DROP TRIGGER IF EXISTS trg_check_capacite_serveur_prod$$
 CREATE TRIGGER trg_check_capacite_serveur_prod
 BEFORE INSERT ON `Environnement`
 FOR EACH ROW
 BEGIN
     DECLARE v_ram INT;
     
-    -- On ne vérifie que si un serveur est défini ET que c'est de la production
     IF NEW.idServ IS NOT NULL AND NEW.typeEnv = 'PRODUCTION' THEN
         SELECT ram_gb INTO v_ram FROM `Serveur` WHERE idServ = NEW.idServ;
         
-        -- Si la RAM est connue et qu'elle est strictement inférieure à 4
         IF v_ram IS NOT NULL AND v_ram < 4 THEN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erreur d''infrastructure : Impossible d''affecter un environnement de PRODUCTION sur un serveur possédant moins de 4 Go de RAM.';
         END IF;
     END IF;
 END$$
 
-
-/* ==================================================== */
-/* 2. AUTOMATISATION (CYCLE DE VIE)                     */
-/* ==================================================== */
-
--- Livraison automatique à 100% d'avancement
-CREATE TRIGGER trg_auto_livraison
-BEFORE UPDATE ON `Projet`
-FOR EACH ROW
-BEGIN
-    IF NEW.pourcentageAvancement = 100 AND OLD.pourcentageAvancement < 100 THEN
-        SET NEW.statutProjet = 'LIVRE';
-    END IF;
-END$$
-
--- Bloquer les affectations sur projet clôturé
-CREATE TRIGGER trg_bloquer_affectation_projet_termine
-BEFORE INSERT ON `Affectation`
-FOR EACH ROW
-BEGIN
-    DECLARE v_statut VARCHAR(20);
-    SELECT statutProjet INTO v_statut FROM `Projet` WHERE idProjet = NEW.idProjet;
-    IF v_statut IN ('LIVRE', 'ANNULE') THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Modification impossible : Le projet est clôturé (Livré ou Annulé).';
-    END IF;
-END$$
-
--- Suivi Commercial : Mettre à jour automatiquement la date de traitement d'une demande
-CREATE TRIGGER trg_auto_date_traitement_demande
-BEFORE UPDATE ON `DemandeProjet`
-FOR EACH ROW
-BEGIN
-    -- Si le statut change et n'est plus "EN_ATTENTE"
-    IF NEW.statutDemande != OLD.statutDemande AND NEW.statutDemande IN ('ACCEPTE', 'REJETE') THEN
-        SET NEW.dateTraitement = CURRENT_TIMESTAMP;
-    END IF;
-END$$
-
-
-/* ==================================================== */
-/* 3. SÉCURITÉ ET AUDIT                                 */
-/* ==================================================== */
-
--- Interdire la suppression physique (Soft Delete)
-CREATE TRIGGER trg_interdire_suppression_projet
-BEFORE DELETE ON `Projet`
-FOR EACH ROW
-BEGIN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sécurité : La suppression d''un projet est interdite. Veuillez changer son statut en ANNULE.';
-END$$
-
--- Journalisation des modifications techniques
-CREATE TRIGGER trg_audit_env_update
-AFTER UPDATE ON `Environnement`
-FOR EACH ROW
-BEGIN
-    IF (OLD.urlFront != NEW.urlFront) OR (OLD.urlBack != NEW.urlBack) THEN
-        INSERT INTO `Audit_Environnement` 
-        (idEnv, action, ancienne_urlFront, nouvelle_urlFront, ancienne_urlBack, nouvelle_urlBack)
-        VALUES 
-        (NEW.idEnv, 'UPDATE', OLD.urlFront, NEW.urlFront, OLD.urlBack, NEW.urlBack);
-    END IF;
-END$$
-
--- Intégrité Commerciale : Empêcher la modification d'une demande clôturée
-CREATE TRIGGER trg_bloquer_modif_demande_cloturee
-BEFORE UPDATE ON `DemandeProjet`
-FOR EACH ROW
-BEGIN
-    -- Si l'ancienne demande était déjà traitée
-    IF OLD.statutDemande IN ('ACCEPTE', 'REJETE') THEN
-        -- Autoriser uniquement le changement de statut (erreur de clic), mais interdire de modifier les infos
-        IF OLD.descriptionBesoin != NEW.descriptionBesoin OR OLD.titreProjet != NEW.titreProjet OR OLD.budgetEstime != NEW.budgetEstime THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sécurité : Impossible de modifier les détails d''une demande qui a déjà été traitée (Acceptée ou Rejetée).';
-        END IF;
-    END IF;
-END$$
-
-
-/* ==================================================== */
-/* 4. VALIDATION DE FORMAT                              */
-/* ==================================================== */
-
--- Validation du format des URLs
+-- 1.6 Validation du format des URLs
+DROP TRIGGER IF EXISTS trg_format_url$$
 CREATE TRIGGER trg_format_url
 BEFORE INSERT ON `Environnement`
 FOR EACH ROW
@@ -202,4 +106,86 @@ BEGIN
     END IF;
 END$$
 
+
+/* ==================================================== */
+/* 2. AUTOMATISATION (CYCLE DE VIE)                     */
+/* ==================================================== */
+
+-- 2.1 Livraison automatique à 100% d'avancement
+DROP TRIGGER IF EXISTS trg_auto_livraison$$
+CREATE TRIGGER trg_auto_livraison
+BEFORE UPDATE ON `Projet`
+FOR EACH ROW
+BEGIN
+    IF NEW.pourcentageAvancement = 100 AND OLD.pourcentageAvancement < 100 THEN
+        SET NEW.statutProjet = 'LIVRE';
+    END IF;
+END$$
+
+-- 2.2 Bloquer les affectations sur projet clôturé
+DROP TRIGGER IF EXISTS trg_bloquer_affectation_projet_termine$$
+CREATE TRIGGER trg_bloquer_affectation_projet_termine
+BEFORE INSERT ON `Affectation`
+FOR EACH ROW
+BEGIN
+    DECLARE v_statut VARCHAR(20);
+    SELECT statutProjet INTO v_statut FROM `Projet` WHERE idProjet = NEW.idProjet;
+    IF v_statut IN ('LIVRE', 'ANNULE') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Modification impossible : Le projet est clôturé (Livré ou Annulé).';
+    END IF;
+END$$
+
+-- 2.3 Suivi Commercial : Mettre à jour automatiquement la date de traitement d'une demande
+DROP TRIGGER IF EXISTS trg_auto_date_traitement_demande$$
+CREATE TRIGGER trg_auto_date_traitement_demande
+BEFORE UPDATE ON `DemandeProjet`
+FOR EACH ROW
+BEGIN
+    IF NEW.statutDemande != OLD.statutDemande AND NEW.statutDemande IN ('ACCEPTE', 'REJETE') THEN
+        SET NEW.dateTraitement = CURRENT_TIMESTAMP;
+    END IF;
+END$$
+
+
+/* ==================================================== */
+/* 3. SÉCURITÉ ET AUDIT (TRAÇABILITÉ)                   */
+/* ==================================================== */
+
+-- 3.1 Interdire la suppression physique (Soft Delete)
+DROP TRIGGER IF EXISTS trg_interdire_suppression_projet$$
+CREATE TRIGGER trg_interdire_suppression_projet
+BEFORE DELETE ON `Projet`
+FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sécurité : La suppression d''un projet est interdite. Veuillez changer son statut en ANNULE.';
+END$$
+
+-- 3.2 Journalisation des modifications techniques
+DROP TRIGGER IF EXISTS trg_audit_env_update$$
+CREATE TRIGGER trg_audit_env_update
+AFTER UPDATE ON `Environnement`
+FOR EACH ROW
+BEGIN
+    IF (OLD.urlFront != NEW.urlFront) OR (OLD.urlBack != NEW.urlBack) THEN
+        INSERT INTO `Audit_Environnement` 
+        (idEnv, action, ancienne_urlFront, nouvelle_urlFront, ancienne_urlBack, nouvelle_urlBack)
+        VALUES 
+        (NEW.idEnv, 'UPDATE', OLD.urlFront, NEW.urlFront, OLD.urlBack, NEW.urlBack);
+    END IF;
+END$$
+
+-- 3.3 Intégrité Commerciale : Empêcher la modification d'une demande clôturée
+DROP TRIGGER IF EXISTS trg_bloquer_modif_demande_cloturee$$
+CREATE TRIGGER trg_bloquer_modif_demande_cloturee
+BEFORE UPDATE ON `DemandeProjet`
+FOR EACH ROW
+BEGIN
+    IF OLD.statutDemande IN ('ACCEPTE', 'REJETE') THEN
+        IF OLD.descriptionBesoin != NEW.descriptionBesoin OR OLD.titreProjet != NEW.titreProjet OR OLD.budgetEstime != NEW.budgetEstime THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Sécurité : Impossible de modifier les détails d''une demande qui a déjà été traitée (Acceptée ou Rejetée).';
+        END IF;
+    END IF;
+END$$
+
+-- Rétablissement du délimiteur classique
 DELIMITER ;

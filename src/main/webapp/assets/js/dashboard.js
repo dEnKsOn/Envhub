@@ -164,11 +164,27 @@
       });
   }
 
+  function shouldSkipAjax(url) {
+    var pathsToSkip = [
+      '/admin/environnements',
+      '/admin/demandes',
+      '/admin/utilisateurs',
+      '/admin/serveurs',
+      '/admin/technologies'
+    ];
+    return pathsToSkip.some(function(path) {
+      return url.includes(path);
+    });
+  }
+
   function initAjaxNavigation() {
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(function (link) {
       if (!link.href) return;
       link.addEventListener('click', function (event) {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+          return;
+        }
+        if (shouldSkipAjax(link.href)) {
           return;
         }
         event.preventDefault();
@@ -178,7 +194,9 @@
 
     window.addEventListener('popstate', function (event) {
       var url = (event.state && event.state.url) ? event.state.url : window.location.href;
-      loadPage(url, false);
+      if (!shouldSkipAjax(url)) {
+        loadPage(url, false);
+      }
     });
   }
 
