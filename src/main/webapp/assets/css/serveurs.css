@@ -1,244 +1,384 @@
 /**
  * serveurs.css — Cohérence Visuelle EnvHub
- * Aligné sur login.css, clients.css et le layout global
+ * Style Premium SaaS avec Modales "Glow 3D" (Inspiré de projets.css)
  */
 
 /* =========================================
-   1. VARIABLES DE PORTÉE LOCALE (Sync Login)
+   1. VARIABLES DE PORTÉE LOCALE
    ========================================= */
-:root {
-  --shadow-tech: 0 10px 25px -5px rgba(12, 22, 37, 0.05), 0 8px 10px -6px rgba(12, 22, 37, 0.01);
-  --focus-glow: 0 0 0 3px rgba(100, 116, 139, 0.15);
-  --bg-input: #FAFAF9;
-}
-
-/* =========================================
-   2. RECHERCHE ET FILTRES
-   ========================================= */
-.search-form {
-  display: flex;
-  gap: 12px;
-  background: var(--bg-surface);
-  padding: 16px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-tech);
-}
-
-.search-input-wrapper {
-  flex: 1;
-}
-
-.search-input-wrapper input {
-  background-color: var(--bg-input);
-  border: 1.5px solid var(--border-light);
-  transition: all 0.2s ease;
-}
-
-.search-input-wrapper input:focus {
-  border-color: var(--primary);
-  background-color: var(--bg-surface);
-  box-shadow: var(--focus-ring);
-}
-
-/* =========================================
-   3. TABLEAU DES SERVEURS (Minimaliste)
-   ========================================= */
-.table-responsive {
-  background: var(--bg-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-tech);
-  overflow: hidden;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th {
-  background: #FAFAFA;
-  padding: 14px 24px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  border-bottom: 1.5px solid var(--border-light);
-  text-align: left;
-}
-
-.data-table td {
-  padding: 16px 24px;
-  font-size: 0.9rem;
-  color: var(--text-main);
-  border-bottom: 1px solid var(--border-light);
-  vertical-align: middle;
-}
-
-.data-table tbody tr:hover {
-  background-color: rgba(241, 245, 249, 0.5);
-}
-
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-
-.text-capitalize {
-  text-transform: capitalize;
-  font-weight: 500;
-}
-
-/* =========================================
-   4. BADGES ET COMPOSANTS DE LIGNE
-   ========================================= */
-.badge-outline {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 99px;
-  border: 1px solid var(--border-light);
-  background: #FAFAFA;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.avatar-sm {
-  width: 32px;
-  height: 32px;
-  background: var(--border-light);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-}
-
-/* =========================================
-   5. MODALES SPÉCIFIQUES & ICÔNES
-   ========================================= */
-#serveur-modal .modal-card {
-  width: min(600px, 95vw);
-}
-
-.modal-header-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background-color: rgba(100, 116, 139, 0.1);
-  color: #0C1625;
-  border-radius: 12px;
-  margin-right: 16px;
-}
-
-.modal-header-content {
-  display: flex;
-  align-items: center;
-}
-
-.modal-header-content h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: var(--text-main);
-  line-height: 1.2;
-}
-
-.modal-header-content p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.input-with-icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-with-icon i,
-.input-with-icon svg {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94A3B8;
-  width: 18px;
-  height: 18px;
-  pointer-events: none;
-}
-
-.input-with-icon .form-control {
-  padding-left: 42px;
-  width: 100%;
-}
-
-/* =========================================
-   6. ÉLÉMENTS DE FORMULAIRE (Style Login)
-   ========================================= */
-.form-group label {
-  color: #324155;
-  font-weight: 500;
-  font-size: 0.9rem;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.form-control {
-  width: 100%;
-  background-color: var(--bg-input);
-  border: 1.5px solid var(--border-light);
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  font-family: 'Satoshi', sans-serif;
-  color: var(--text-main);
-}
-
-.form-control:focus {
-  border-color: var(--primary);
-  background-color: var(--bg-surface);
-  box-shadow: var(--focus-ring);
-}
-
-/* =========================================
-   7. ALERTES ET MESSAGES
-   ========================================= */
-.alert {
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-bottom: 24px;
-}
-
-.alert-success {
-  background-color: #F0FDF4;
-  color: #166534;
-  border: 1px solid rgba(22, 101, 52, 0.2);
-}
-
-.alert-danger {
-  background-color: #FEF2F2;
-  color: #B91C1C;
-  border: 1px solid rgba(185, 28, 28, 0.2);
-}
-
-.search-result-message {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* =========================================
-   8. UTILITAIRES DE TEXTE
-   ========================================= */
-.text-right { text-align: right; }
-.text-red-500 { color: var(--danger); }
-.text-xs { font-size: 0.75rem; }
+   :root {
+    --shadow-base: 0 2px 4px rgba(12, 22, 37, 0.02), 0 4px 6px rgba(12, 22, 37, 0.02);
+    --shadow-hover: 0 12px 20px -5px rgba(12, 22, 37, 0.08), 0 8px 10px -6px rgba(12, 22, 37, 0.04);
+    --focus-ring: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    --bg-input: #F8FAFC;
+  }
+  
+  /* =========================================
+     2. RECHERCHE ET FILTRES
+     ========================================= */
+  .search-form {
+    display: flex;
+    gap: 16px;
+    background: var(--bg-surface, #FFFFFF);
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: var(--shadow-base);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: center;
+  }
+  
+  .search-form:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: #CBD5E1;
+  }
+  
+  .search-input-wrapper {
+    flex: 1;
+  }
+  
+  .search-input-wrapper input {
+    background-color: var(--bg-input);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 16px;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  
+  .search-input-wrapper input:focus {
+    border-color: var(--primary, #3B82F6);
+    background-color: var(--bg-surface, #FFFFFF);
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+  
+  /* =========================================
+     3. TABLEAU DES SERVEURS (Style Card)
+     ========================================= */
+  .card {
+    background: var(--bg-surface, #FFFFFF);
+    border-radius: 16px;
+    border: 1px solid var(--border-light, #E2E8F0);
+    box-shadow: var(--shadow-base);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: #CBD5E1;
+  }
+  
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .data-table th {
+    background: #FAFAFA;
+    padding: 14px 24px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    border-bottom: 1px solid #E2E8F0;
+    text-align: left;
+  }
+  
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 0.9rem;
+    color: #0F172A;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+  }
+  
+  .data-table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  
+  .data-table tbody tr:hover {
+    background-color: #F8FAFC;
+  }
+  
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .text-capitalize {
+    text-transform: capitalize;
+    font-weight: 500;
+  }
+  
+  /* =========================================
+     4. BADGES ET BOUTONS D'ACTION
+     ========================================= */
+  .badge-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid #E2E8F0;
+    background: #FAFAFA;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748B;
+  }
+  
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #F1F5F9;
+    color: #64748B;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-icon:hover {
+    background: var(--primary, #3B82F6);
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  }
+  
+  .btn-icon.text-red-500:hover {
+    background: #EF4444;
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  }
+  
+  .btn-icon i {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* =========================================
+     5. MODALES PREMIUM ET ICÔNES LUMINÉES 3D
+     ========================================= */
+  .modal-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(15, 23, 42, 0.6); 
+    backdrop-filter: blur(4px); 
+    display: flex; align-items: center; justify-content: center; 
+    z-index: 1000; opacity: 0; visibility: hidden; pointer-events: none;
+    transition: all 0.3s ease; 
+  }
+  
+  .modal-overlay.is-visible { 
+    opacity: 1; 
+    visibility: visible; 
+    pointer-events: auto; 
+  }
+  
+  #serveur-modal .modal-card,
+  #delete-serveur-modal .modal-card {
+    width: min(650px, 95vw);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface, #FFFFFF);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .modal-overlay.is-visible .modal-card { 
+    transform: translateY(0); 
+  }
+  
+  /* --- ICÔNE MODALE AJOUT/MODIF (Lueur & Volume 3D) --- */
+  .modal-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-right: 20px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    position: relative;
+    
+    /* Dégradé de fond doux (Bleu/Indigo) */
+    background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+    color: var(--primary, #4F46E5);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    
+    /* Glow externe et effet de volume interne */
+    box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.25),
+                inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+  
+  .modal-header-icon i,
+  .modal-header-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2.2px;
+    /* Ombre portée directement sur le tracé de l'icône SVG */
+    filter: drop-shadow(0 2px 3px rgba(79, 70, 229, 0.4));
+  }
+  
+  /* --- ICÔNE MODALE SUPPRESSION (Danger / Rouge 3D) --- */
+  #delete-serveur-modal .modal-header h2 {
+    color: #B91C1C;
+  }
+  
+  #delete-serveur-modal .modal-header-icon {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    color: #DC2626;
+    border-color: rgba(220, 38, 38, 0.15);
+    box-shadow: 0 8px 16px -4px rgba(220, 38, 38, 0.25),
+                inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+  
+  #delete-serveur-modal .modal-header-icon i,
+  #delete-serveur-modal .modal-header-icon svg {
+    filter: drop-shadow(0 2px 3px rgba(220, 38, 38, 0.4));
+  }
+  
+  /* Structure de l'en-tête */
+  .modal-header {
+    padding: 24px;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .modal-header-content {
+    display: flex;
+    align-items: center;
+  }
+  
+  .modal-header-content h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.02em;
+  }
+  
+  .modal-header-content p {
+    margin: 4px 0 0 0;
+    font-size: 0.9rem;
+    color: #64748B;
+  }
+  
+  .modal-close {
+    background: #F1F5F9; border: none; color: #64748B; cursor: pointer;
+    padding: 8px; border-radius: 8px; transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  
+  .modal-close:hover { 
+    background: #FEE2E2; 
+    color: #DC2626; 
+  }
+  
+  .modal-body { padding: 24px; }
+  
+  .modal-actions { 
+    padding: 24px; 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 12px; 
+    border-top: 1px solid #E2E8F0; 
+  }
+  
+  /* =========================================
+     6. ÉLÉMENTS DE FORMULAIRE
+     ========================================= */
+  .form-group label {
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-with-icon i,
+  .input-with-icon svg {
+    position: absolute;
+    left: 14px;
+    color: #94A3B8;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+  
+  .form-control {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: #0F172A;
+    transition: all 0.2s ease;
+  }
+  
+  .input-with-icon .form-control {
+    padding-left: 42px;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary, #3B82F6);
+    background-color: var(--bg-surface, #FFFFFF);
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+  
+  /* =========================================
+     7. ALERTES ET UTILITAIRES
+     ========================================= */
+  .alert {
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow-base);
+  }
+  
+  .alert-success {
+    background-color: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+  }
+  
+  .alert-danger {
+    background-color: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+  }
+  
+  .search-result-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .text-right { text-align: right; }
+  .text-red-500 { color: #EF4444; }
+  .text-xs { font-size: 0.75rem; }
