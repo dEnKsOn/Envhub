@@ -25,10 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Servlet de la page « Détails du projet » : fiche projet, environnements et gestion de l'équipe (affectations).
- * Applique les droits IAM (administrateur, chef de projet, lecture seule) et le pattern Post-Redirect-Get.
- */
 @WebServlet("/admin/projets/details")
 public class ProjetDetailsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -40,9 +36,6 @@ public class ProjetDetailsServlet extends HttpServlet {
     private AffectationDAO affectationDAO;
     private UtilisateurDAO utilisateurDAO;
 
-    /**
-     * Initialise les DAO utilisés pour les projets, clients, environnements, affectations et utilisateurs.
-     */
     @Override
     public void init() throws ServletException {
         this.projetDAO = new ProjetDAO();
@@ -52,10 +45,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         this.utilisateurDAO = new UtilisateurDAO();
     }
 
-    /**
-     * Affiche la page de détails : charge le projet par son id, prépare les données (équipe, environnements, droits)
-     * puis transmet la requête à la vue JSP.
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!isAuthenticated(request)) {
@@ -65,13 +54,13 @@ public class ProjetDetailsServlet extends HttpServlet {
 
         UUID projetId = parseProjetId(request.getParameter("id"));
         if (projetId == null) {
-            response.sendRedirect(request.getContextPath() + "/projets");
+            response.sendRedirect(request.getContextPath() + "/admin/projets");
             return;
         }
 
         Projet projet = projetDAO.findById(projetId);
         if (projet == null) {
-            response.sendRedirect(request.getContextPath() + "/projets");
+            response.sendRedirect(request.getContextPath() + "/admin/projets");
             return;
         }
 
@@ -79,10 +68,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         request.getRequestDispatcher("/admin/projets/details.jsp").forward(request, response);
     }
 
-    /**
-     * Traite les actions du formulaire (formAction) : ajout/retrait de membre ou mise à jour du projet.
-     * Vérifie les droits de l'utilisateur connecté avant de déléguer au handler approprié.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!isAuthenticated(request)) {
@@ -96,13 +81,13 @@ public class ProjetDetailsServlet extends HttpServlet {
             projetId = parseProjetId(request.getParameter("id"));
         }
         if (projetId == null) {
-            response.sendRedirect(request.getContextPath() + "/projets");
+            response.sendRedirect(request.getContextPath() + "/admin/projets");
             return;
         }
 
         Projet projet = projetDAO.findById(projetId);
         if (projet == null) {
-            response.sendRedirect(request.getContextPath() + "/projets");
+            response.sendRedirect(request.getContextPath() + "/admin/projets");
             return;
         }
 
@@ -146,10 +131,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         forwardWithError(request, response, projet, "Action non reconnue.");
     }
 
-    /**
-     * Ajoute un membre à l'équipe du projet (affectation en base).
-     * Valide le rôle (seul l'admin peut nommer un chef), exclut les administrateurs et gère les erreurs SQL métier.
-     */
     private void handleAddMember(HttpServletRequest request, HttpServletResponse response, UUID projetId,
                                  boolean isAdmin, String redirectUrl) throws IOException, ServletException {
         String userIdStr = request.getParameter("memberUserId");
@@ -200,8 +181,7 @@ public class ProjetDetailsServlet extends HttpServlet {
 
         if (isAdministrateur(membre)) {
             Projet projet = projetDAO.findById(projetId);
-            forwardWithError(request, response, projet,
-                    "Un administrateur ne peut pas être affecté à l'équipe d'un projet.");
+            forwardWithError(request, response, projet, "Un administrateur ne peut pas être affecté à l'équipe d'un projet.");
             return;
         }
 
@@ -214,6 +194,9 @@ public class ProjetDetailsServlet extends HttpServlet {
 
         try {
             if (affectationDAO.save(affectation)) {
+                // 🚀 DÉCLENCHEMENT DE L'AUTOMATISATION
+                projetDAO.evaluerProgression(projetId);
+                
                 response.sendRedirect(redirectUrl + "&success=true");
             } else {
                 Projet projet = projetDAO.findById(projetId);
@@ -225,10 +208,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Retire un membre de l'équipe en supprimant son affectation pour ce projet.
-     * Redirige en cas de succès (PRG), sinon réaffiche la page avec un message d'erreur.
-     */
     private void handleRemoveMember(HttpServletRequest request, HttpServletResponse response, UUID projetId,
                                     String redirectUrl) throws IOException, ServletException {
         String userIdStr = request.getParameter("memberUserId");
@@ -261,10 +240,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Met à jour les informations du projet (nom, client, statut, avancement, dates, description).
-     * Parse et valide les champs du formulaire avant d'appeler le DAO.
-     */
     private void handleUpdateProjet(HttpServletRequest request, HttpServletResponse response, Projet existing,
                                     String redirectUrl) throws IOException, ServletException {
         String nom = request.getParameter("nom");
@@ -339,10 +314,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Charge toutes les données nécessaires à la vue : projet, équipe, environnements, clients,
-     * droits IAM de l'utilisateur connecté et liste des utilisateurs éligibles à une affectation.
-     */
     private void loadPageData(HttpServletRequest request, Projet projet) {
         UUID projetId = projet.getIdProjet();
         Utilisateur currentUser = getCurrentUser(request);
@@ -377,9 +348,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         request.setAttribute("utilisateursDisponibles", utilisateursDisponibles);
     }
 
-    /**
-     * Réaffiche la page de détails avec un message d'erreur (sans redirection), après rechargement des données.
-     */
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response, Projet projet,
                                   String message) throws ServletException, IOException {
         request.setAttribute("erreur", message);
@@ -387,9 +355,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         request.getRequestDispatcher("/admin/projets/details.jsp").forward(request, response);
     }
 
-    /**
-     * Traduit les messages d'erreur SQL des triggers (chef unique, projet clôturé) en messages lisibles pour l'utilisateur.
-     */
     private String mapSqlError(SQLException e) {
         String msg = e.getMessage();
         if (msg != null) {
@@ -403,17 +368,11 @@ public class ProjetDetailsServlet extends HttpServlet {
         return "Impossible d'effectuer l'affectation. Vérifiez les règles métier.";
     }
 
-    /**
-     * Indique si l'utilisateur possède le profil système « Administrateur » (droits globaux sur l'application).
-     */
     private boolean isAdministrateur(Utilisateur user) {
         return user != null && user.getProfil() != null
                 && PROFIL_ADMIN.equals(user.getProfil().getLibelle());
     }
 
-    /**
-     * Récupère l'utilisateur connecté stocké en session (attribut « user »).
-     */
     private Utilisateur getCurrentUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
@@ -422,9 +381,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         return (Utilisateur) session.getAttribute("user");
     }
 
-    /**
-     * Convertit le paramètre id de la requête en UUID ; retourne null si absent ou invalide.
-     */
     private UUID parseProjetId(String idParam) {
         if (idParam == null || idParam.trim().isEmpty()) {
             return null;
@@ -436,9 +392,6 @@ public class ProjetDetailsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Vérifie qu'une session active contient un utilisateur connecté.
-     */
     private boolean isAuthenticated(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         return session != null && session.getAttribute("user") != null;

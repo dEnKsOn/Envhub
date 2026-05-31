@@ -113,8 +113,12 @@ public class DemandesServlet extends HttpServlet {
         UUID idClient = UUID.randomUUID();
         UUID idProjet = UUID.randomUUID();
 
+        // Les requêtes SQL
         String sqlUpdateDemande = "UPDATE DemandeProjet SET statutDemande = 'ACCEPTE', dateTraitement = CURRENT_TIMESTAMP WHERE idDemande = ?";
-        String sqlInsertClient = "INSERT INTO Client (idClient, nomClient, prenomClient, entrepriseClient) VALUES (?, ?, '', ?)";
+        
+        // CORRECTION ICI : Ajout du champ emailClient
+        String sqlInsertClient = "INSERT INTO Client (idClient, nomClient, prenomClient, entrepriseClient, emailClient) VALUES (?, ?, '', ?, ?)";
+        
         String sqlInsertProjet = "INSERT INTO Projet (idProjet, nomProjet, descriptionTech, dateLancement, statutProjet, pourcentageAvancement, idClient) VALUES (?, ?, ?, CURRENT_DATE(), 'EN_COURS', 0, ?)";
 
         try (Connection conn = DbConnection.getConnection()) {
@@ -124,14 +128,18 @@ public class DemandesServlet extends HttpServlet {
                  PreparedStatement stmtClient = conn.prepareStatement(sqlInsertClient);
                  PreparedStatement stmtProjet = conn.prepareStatement(sqlInsertProjet)) {
 
+                // 1. Mise à jour de la demande
                 stmtDemande.setString(1, idDemande.toString());
                 stmtDemande.executeUpdate();
 
+                // 2. Création du client avec l'email !
                 stmtClient.setString(1, idClient.toString());
                 stmtClient.setString(2, demande.getNomClient());
-                stmtClient.setString(3, demande.getEntrepriseClient() != null ? demande.getEntrepriseClient() : "Particulier");
+                stmtClient.setString(3, demande.getEntrepriseClient() != null && !demande.getEntrepriseClient().trim().isEmpty() ? demande.getEntrepriseClient() : "Particulier");
+                stmtClient.setString(4, demande.getEmailClient()); // Injection de l'email
                 stmtClient.executeUpdate();
 
+                // 3. Création du projet
                 stmtProjet.setString(1, idProjet.toString());
                 stmtProjet.setString(2, demande.getTitreProjet());
                 stmtProjet.setString(3, demande.getDescriptionBesoin());

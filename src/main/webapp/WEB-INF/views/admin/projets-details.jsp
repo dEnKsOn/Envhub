@@ -6,7 +6,7 @@
 
   <div class="flex items-center justify-between gap-4 wrap projet-details-toolbar">
     <div>
-      <a href="${pageContext.request.contextPath}/projets" class="back-link text-sm text-muted">
+      <a href="${pageContext.request.contextPath}/admin/projets" class="back-link text-sm text-muted">
         <i data-lucide="arrow-left"></i>
         Retour aux projets
       </a>

@@ -12,7 +12,6 @@
       let hasVisibleRows = false;
       
       rows.forEach(row => {
-        // Ignorer la ligne de message vide ("Aucun utilisateur")
         if (row.cells.length > 1) {
           const text = row.textContent.toLowerCase();
           if (text.includes(term)) {
@@ -36,7 +35,6 @@
       }
     });
 
-    // Empêcher la soumission classique du formulaire vu que la recherche est instantanée
     if (searchForm) {
       searchForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -59,7 +57,6 @@
       }
     });
 
-    // Cacher l'erreur dès que l'utilisateur modifie l'email
     emailInput.addEventListener('input', function() {
       emailError.style.display = 'none';
       emailInput.style.borderColor = '';
@@ -71,9 +68,10 @@
 if (!window.utilisateursJsInitialized) {
   window.utilisateursJsInitialized = true;
 
-  // --- Fonctions Modales ---
+  // --- Fonctions Modales (Corrigées) ---
   function openModal(modal) {
     if (modal) {
+      modal.classList.remove('is-hidden'); // Sécurité
       modal.classList.add('is-visible');
       modal.setAttribute('aria-hidden', 'false');
     }
@@ -101,6 +99,13 @@ if (!window.utilisateursJsInitialized) {
     openModal(modal);
     if (userFormAction) userFormAction.value = mode === 'edit' ? 'update' : 'create';
 
+    const userIdInput = document.getElementById('userId');
+    const prenomInput = document.getElementById('prenom');
+    const nomInput = document.getElementById('nom');
+    const emailInput = document.getElementById('email');
+    const genreSelect = document.getElementById('genre');
+    const profilSelect = document.getElementById('idProfil');
+
     if (mode === 'edit') {
       if (userModalTitle) userModalTitle.textContent = 'Modifier l\u2019utilisateur';
       if (userModalSubtitle) userModalSubtitle.textContent = 'Mettez à jour les informations de cet utilisateur.';
@@ -112,19 +117,33 @@ if (!window.utilisateursJsInitialized) {
       if (passwordInput) { passwordInput.required = false; passwordInput.value = ''; }
       if (passwordHelp) passwordHelp.style.display = 'block';
       
-      const userIdInput = document.getElementById('userId');
-      const prenomInput = document.getElementById('prenom');
-      const nomInput = document.getElementById('nom');
-      const emailInput = document.getElementById('email');
-      const genreSelect = document.getElementById('genre');
-      const profilSelect = document.getElementById('idProfil');
-
       if (userIdInput) userIdInput.value = user.id || '';
       if (prenomInput) prenomInput.value = user.prenom || '';
       if (nomInput) nomInput.value = user.nom || '';
       if (emailInput) emailInput.value = user.email || '';
       if (genreSelect) genreSelect.value = user.genre || '';
-      if (profilSelect) profilSelect.value = user.profilId || '';
+      
+      // --- LOGIQUE UX : UN SEUL ADMIN ---
+      if (profilSelect) {
+        profilSelect.value = user.profilId || '';
+        
+        // CORRECTION : Lecture sécurisée de l'option sélectionnée
+        const selectedOption = profilSelect.options[profilSelect.selectedIndex];
+        const selectedText = selectedOption ? selectedOption.text.toLowerCase() : '';
+        
+        Array.from(profilSelect.options).forEach(opt => {
+          if (selectedText && selectedText.includes('administrateur')) {
+            // Verrouille l'Admin pour l'empêcher de changer son propre rôle
+            opt.disabled = (opt.value !== profilSelect.value);
+            profilSelect.title = "L'Administrateur ne peut pas perdre ses droits.";
+          } else {
+            // Empêche la promotion d'un Dev en Admin
+            opt.disabled = opt.text.toLowerCase().includes('administrateur');
+            profilSelect.title = "";
+          }
+        });
+      }
+
     } else {
       if (userModalTitle) userModalTitle.textContent = 'Ajouter un utilisateur';
       if (userModalSubtitle) userModalSubtitle.textContent = 'Veuillez renseigner les informations de l\'utilisateur.';
@@ -136,19 +155,20 @@ if (!window.utilisateursJsInitialized) {
       if (passwordInput) { passwordInput.required = true; passwordInput.value = ''; }
       if (passwordHelp) passwordHelp.style.display = 'none';
       
-      const userIdInput = document.getElementById('userId');
-      const prenomInput = document.getElementById('prenom');
-      const nomInput = document.getElementById('nom');
-      const emailInput = document.getElementById('email');
-      const genreSelect = document.getElementById('genre');
-      const profilSelect = document.getElementById('idProfil');
-
       if (userIdInput) userIdInput.value = '';
       if (prenomInput) prenomInput.value = '';
       if (nomInput) nomInput.value = '';
       if (emailInput) emailInput.value = '';
       if (genreSelect) genreSelect.value = '';
-      if (profilSelect) profilSelect.value = '';
+      
+      // --- LOGIQUE UX : UN SEUL ADMIN ---
+      if (profilSelect) {
+        profilSelect.value = '';
+        Array.from(profilSelect.options).forEach(opt => {
+          // Bloque la sélection "Administrateur" pour la création
+          opt.disabled = opt.text.toLowerCase().includes('administrateur');
+        });
+      }
     }
   }
 
@@ -165,7 +185,6 @@ if (!window.utilisateursJsInitialized) {
 
   // --- Délégation d'événements globale ---
   document.addEventListener('click', function(e) {
-    // Bouton Ajouter / Open Modal
     const btnAdd = e.target.closest('#btn-add-user') || e.target.closest('.open-user-modal');
     if (btnAdd) {
       e.preventDefault();
@@ -173,7 +192,6 @@ if (!window.utilisateursJsInitialized) {
       return;
     }
 
-    // Bouton Modifier
     const btnEdit = e.target.closest('.edit-user-btn');
     if (btnEdit) {
       e.preventDefault();
@@ -188,7 +206,6 @@ if (!window.utilisateursJsInitialized) {
       return;
     }
 
-    // Bouton Supprimer
     const btnDelete = e.target.closest('.delete-user-btn');
     if (btnDelete) {
       e.preventDefault();
@@ -196,28 +213,24 @@ if (!window.utilisateursJsInitialized) {
       return;
     }
 
-    // Boutons de fermeture Modale Utilisateur
     if (e.target.closest('#close-user-modal') || e.target.closest('#cancel-user-modal') || e.target.closest('#user-modal .modal-close')) {
       e.preventDefault();
       closeModal(document.getElementById('user-modal'));
       return;
     }
 
-    // Boutons de fermeture Modale Suppression
     if (e.target.closest('#delete-close-user-modal') || e.target.closest('#delete-user-cancel') || e.target.closest('#delete-user-modal .modal-close')) {
       e.preventDefault();
       closeModal(document.getElementById('delete-user-modal'));
       return;
     }
 
-    // Clic sur l'overlay pour fermer
     if (e.target.matches('.modal-overlay')) {
       closeModal(e.target);
     }
   });
 }
 
-// S'assurer que les icônes sont rendues immédiatement si on vient d'injecter la page
 if (typeof window.refreshLucideIcons === 'function') {
   window.refreshLucideIcons();
 } else if (typeof lucide !== 'undefined') {

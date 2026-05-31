@@ -19,8 +19,14 @@ public class DbConnection {
     private static final String dbPort = dotenv.get("DB_PORT");
     private static final String dbName = dotenv.get("MYSQL_DATABASE");
 
+    // L'URL de connexion sécurisée avec SSL/TLS forcé
     private static final String URL = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName 
-                                      + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+                                      + "?useSSL=true"
+                                      + "&requireSSL=true"
+                                      + "&serverTimezone=UTC"
+                                      + "&allowPublicKeyRetrieval=false"
+                                      + "&verifyServerCertificate=false"
+                                      + "&enabledTLSProtocols=TLSv1.2,TLSv1.3";
 
     public static Connection getConnection() throws SQLException {
         try {

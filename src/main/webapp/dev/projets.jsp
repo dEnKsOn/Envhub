@@ -2,8 +2,8 @@
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%
     request.setAttribute("pageTitle", "Projets - EnvHub");
-    request.setAttribute("pageContent", "/WEB-INF/views/projets.jsp");
-    request.setAttribute("pageCss", "/assets/css/projets.css");
-    request.setAttribute("pageJs", "/assets/js/projets.js");
+    request.setAttribute("pageContent", "/WEB-INF/views/dev/projets.jsp");
+    request.setAttribute("pageCss", "/assets/css/projetsDev.css");
+    request.setAttribute("pageJs", "/assets/js/projetsDev.js");
 %>
 <jsp:include page="/WEB-INF/views/base_layout.jsp" />

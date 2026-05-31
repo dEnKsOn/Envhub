@@ -43,7 +43,7 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
         try {
             projet.setEntrepriseClient(rs.getString("entrepriseClient"));
         } catch (SQLException e) {
-            // Field not in result set
+            // Le champ peut ne pas être dans le ResultSet selon la requête
         }
 
         try {
@@ -75,7 +75,6 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la récupération du projet : " + e.getMessage());
-            e.printStackTrace();
         }
         return null;
     }
@@ -98,7 +97,6 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la récupération des projets : " + e.getMessage());
-            e.printStackTrace();
         }
         return projets;
     }
@@ -126,7 +124,6 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la recherche des projets : " + e.getMessage());
-            e.printStackTrace();
         }
         return projets;
     }
@@ -172,7 +169,6 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'enregistrement du projet : " + e.getMessage());
-            e.printStackTrace();
         }
         return false;
     }
@@ -214,7 +210,6 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erreur lors de la mise à jour du projet : " + e.getMessage());
-            e.printStackTrace();
         }
         return false;
     }
@@ -230,8 +225,92 @@ public class ProjetDAO implements IGenericDAO<Projet, UUID> {
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erreur lors de la suppression du projet : " + e.getMessage());
-            e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * ===================================================================================
+     * 🚀 MOTEUR DE PROGRESSION AUTOMATISÉ (EVENT-DRIVEN)
+     * ===================================================================================
+     */
+    public void evaluerProgression(UUID idProjet) {
+        try (Connection conn = DbConnection.getConnection()) {
+            
+            int avancementActuel = 0;
+            String sqlProjet = "SELECT pourcentageAvancement FROM Projet WHERE idProjet = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sqlProjet)) {
+                stmt.setString(1, idProjet.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) avancementActuel = rs.getInt("pourcentageAvancement");
+                }
+            }
+
+            int nouvelAvancement = 0;
+
+            String sqlAffect = "SELECT roleProjet FROM Affectation WHERE idProjet = ?";
+            boolean hasChef = false, hasDev = false;
+            try (PreparedStatement stmt = conn.prepareStatement(sqlAffect)) {
+                stmt.setString(1, idProjet.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        if ("CHEF_PROJET".equals(rs.getString("roleProjet"))) hasChef = true;
+                        if ("DEVELOPPEUR".equals(rs.getString("roleProjet"))) hasDev = true;
+                    }
+                }
+            }
+            if (hasChef) nouvelAvancement += 10;
+            if (hasDev) nouvelAvancement += 10;
+
+            String sqlEnv = "SELECT typeEnv FROM Environnement WHERE idProjet = ?";
+            boolean hasLocalOrDev = false, hasStaging = false, hasProd = false;
+            try (PreparedStatement stmt = conn.prepareStatement(sqlEnv)) {
+                stmt.setString(1, idProjet.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        String type = rs.getString("typeEnv");
+                        if ("LOCAL".equals(type) || "DEVELOPPEMENT".equals(type)) hasLocalOrDev = true;
+                        if ("STAGING".equals(type)) hasStaging = true;
+                        if ("PRODUCTION".equals(type)) hasProd = true;
+                    }
+                }
+            }
+            if (hasLocalOrDev) nouvelAvancement += 20;
+            if (hasStaging) nouvelAvancement += 20;
+
+            String sqlTech = "SELECT count(*) AS total FROM VersionTechno vt JOIN Environnement e ON vt.idEnv = e.idEnv WHERE e.idProjet = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sqlTech)) {
+                stmt.setString(1, idProjet.toString());
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next() && rs.getInt("total") > 0) {
+                        nouvelAvancement += 15;
+                    }
+                }
+            }
+
+            if (hasProd) {
+                nouvelAvancement = 100;
+            }
+
+            if (nouvelAvancement > avancementActuel) {
+                String sqlUpdate = "UPDATE Projet SET pourcentageAvancement = ? ";
+                
+                if (nouvelAvancement >= 100) {
+                    nouvelAvancement = 100;
+                    sqlUpdate += ", statutProjet = 'LIVRE' ";
+                }
+                
+                sqlUpdate += "WHERE idProjet = ?";
+                
+                try (PreparedStatement stmt = conn.prepareStatement(sqlUpdate)) {
+                    stmt.setInt(1, nouvelAvancement);
+                    stmt.setString(2, idProjet.toString());
+                    stmt.executeUpdate();
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur (evaluerProgression) : " + e.getMessage());
+        }
     }
 }

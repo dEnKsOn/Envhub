@@ -78,11 +78,15 @@
                               data-profil-id="${user.profil.idProfil}">
                         <i data-lucide="edit-2"></i>
                       </button>
-                      <button type="button" class="btn-icon btn-icon-sm text-red-500 delete-user-btn" title="Supprimer"
-                              data-user-id="${user.idUser}"
-                              data-user-name="${user.prenomUser} ${user.nomUser}">
-                        <i data-lucide="trash-2"></i>
-                      </button>
+                      
+                      <c:if test="${user.profil.libelle != 'Administrateur'}">
+                        <button type="button" class="btn-icon btn-icon-sm text-red-500 delete-user-btn" title="Supprimer"
+                                data-user-id="${user.idUser}"
+                                data-user-name="${user.prenomUser} ${user.nomUser}">
+                          <i data-lucide="trash-2"></i>
+                        </button>
+                      </c:if>
+
                     </div>
                   </td>
                 </tr>
@@ -103,7 +107,7 @@
   </div>
 </div>
 
-<div id="user-modal" class="modal-overlay is-hidden" role="dialog" aria-modal="true">
+<div id="user-modal" class="modal-overlay" role="dialog" aria-modal="true">
   <div class="modal-card">
     <header class="modal-header" style="align-items: flex-start;">
       <div class="modal-header-content">
@@ -149,7 +153,9 @@
               <i data-lucide="mail"></i>
               <input type="email" id="email" name="email" required class="form-control" placeholder="jean.dupont@envhub.ma" />
             </div>
-            <p id="email-error" class="text-xs text-red-500" style="display:none; margin-top: 0.5rem;"><i data-lucide="alert-circle" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>L'adresse email doit se terminer par @envhub.ma</p>
+            <p id="email-error" class="text-xs text-red-500" style="display:none; margin-top: 0.5rem;">
+              <i data-lucide="alert-circle" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>L'adresse email doit se terminer par @envhub.ma
+            </p>
           </div>
           <div class="form-group">
             <label for="genre">Genre</label>
@@ -170,7 +176,9 @@
             <i data-lucide="lock"></i>
             <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" />
           </div>
-          <p id="password-help" class="text-xs text-muted" style="display:none; margin-top: 0.5rem;"><i data-lucide="info" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>Laissez vide pour conserver le mot de passe actuel.</p>
+          <p id="password-help" class="text-xs text-muted" style="display:none; margin-top: 0.5rem;">
+            <i data-lucide="info" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>Laissez vide pour conserver le mot de passe actuel.
+          </p>
         </div>
 
         <div class="form-group">
@@ -215,4 +223,4 @@
       </div>
     </form>
   </div>
-</div> 
+</div>

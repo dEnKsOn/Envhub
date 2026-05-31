@@ -1,4 +1,4 @@
-package controllers;
+package controllers.admin;
 
 import dao.ClientDAO;
 import dao.EnvironnementDAO;
@@ -32,43 +32,32 @@ public class EnvironnementsServlet extends HttpServlet {
         this.technologieDAO = new TechnologieDAO();
     }
 
-    /**
-     * Gère l'affichage de la page et la suppression (requêtes GET)
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
 
-        // 1. Vérification de la session
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2. Interception de l'action de suppression si le paramètre action=delete est présent dans l'URL
         String action = request.getParameter("action");
         if ("delete".equals(action)) {
             traiterSuppression(request, response);
-            return; // On arrête l'exécution ici pour ne pas charger la JSP en double
+            return; 
         }
 
-        // 3. Affichage normal de la page : chargement des données
         request.setAttribute("environnements", environnementDAO.findAll());
         request.setAttribute("clients", clientDAO.findAll());
         request.setAttribute("technologies", technologieDAO.findAll());
         
-        // TA REDIRECTION EXACTE (qui fonctionne)
-        request.getRequestDispatcher("/environnements.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/environnements.jsp").forward(request, response);
     }
 
-    /**
-     * Gère les soumissions de formulaire (Ajout ou Modification via requêtes POST)
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
 
-        // Vérification de la session
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
@@ -76,7 +65,6 @@ public class EnvironnementsServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        // Traitement du formulaire d'ajout ou de mise à jour
         if ("save".equals(action) || "update".equals(action)) {
             traiterSauvegardeOuMiseAJour(request, response, session, action);
         } else {
@@ -84,28 +72,22 @@ public class EnvironnementsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Logique métier d'insertion (save) et de mise à jour (update)
-     */
     private void traiterSauvegardeOuMiseAJour(HttpServletRequest request, HttpServletResponse response, HttpSession session, String action) throws IOException {
         try {
             Environnement env = new Environnement();
             
-            // Gestion de l'ID (Nouveau pour save, Existant pour update)
             if ("update".equals(action)) {
                 env.setIdEnv(UUID.fromString(request.getParameter("idEnv")));
             } else {
                 env.setIdEnv(UUID.randomUUID());
             }
 
-            // Récupération des données du formulaire
             env.setTypeEnv(TypeEnvironnement.valueOf(request.getParameter("typeEnv")));
             env.setUrlFront(request.getParameter("urlFront"));
             env.setUrlBack(request.getParameter("urlBack"));
             env.setNomBaseDeDonnees(request.getParameter("nomBaseDeDonnees"));
             env.setNotes(request.getParameter("notes"));
 
-            // Validation de l'ID du projet
             String idProjetStr = request.getParameter("idProjet");
             if (idProjetStr != null && !idProjetStr.isEmpty()) {
                 env.setIdProjet(UUID.fromString(idProjetStr));
@@ -113,7 +95,6 @@ public class EnvironnementsServlet extends HttpServlet {
                 throw new IllegalArgumentException("L'ID du projet est obligatoire.");
             }
 
-            // Gestion du serveur (Peut être NULL pour les environnements LOCAUX)
             String idServStr = request.getParameter("idServ");
             if (idServStr != null && !idServStr.isEmpty()) {
                 env.setIdServ(UUID.fromString(idServStr));
@@ -121,11 +102,9 @@ public class EnvironnementsServlet extends HttpServlet {
                 env.setIdServ(null);
             }
 
-            // Traçabilité : Attribution de l'environnement à l'utilisateur connecté
             Utilisateur currentUser = (Utilisateur) session.getAttribute("user");
             env.setIdCreator(currentUser.getIdUser());
 
-            // Exécution de la requête en BD
             boolean success = false;
             if ("update".equals(action)) {
                 success = environnementDAO.update(env);
@@ -133,8 +112,10 @@ public class EnvironnementsServlet extends HttpServlet {
                 success = environnementDAO.save(env);
             }
 
-            // Redirection après traitement
             if (success) {
+                // 🚀 DÉCLENCHEMENT DE L'AUTOMATISATION
+                new dao.ProjetDAO().evaluerProgression(env.getIdProjet());
+                
                 response.sendRedirect(request.getContextPath() + "/admin/environnements?msg=" + action + "_success");
             } else {
                 response.sendRedirect(request.getContextPath() + "/admin/environnements?error=db_error");
@@ -146,9 +127,6 @@ public class EnvironnementsServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Logique métier de suppression d'un environnement
-     */
     private void traiterSuppression(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String idEnvStr = request.getParameter("id");
         

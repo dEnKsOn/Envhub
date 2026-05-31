@@ -3,5 +3,7 @@
 <%
     request.setAttribute("pageTitle", "Technologies - EnvHub");
     request.setAttribute("pageContent", "/WEB-INF/views/admin/technologies.jsp");
+    request.setAttribute("pageCss", "/assets/css/technologies.css");
+    request.setAttribute("pageJs", "/assets/js/technologies.js");
 %>
 <jsp:include page="/WEB-INF/views/base_layout.jsp" />
