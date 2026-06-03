@@ -47,6 +47,7 @@
           <tr>
             <th>Entreprise</th>
             <th>Représentant</th>
+            <th>Email</th>
             <th>Projets Associés</th>
             <th class="text-right">Actions</th>
           </tr>
@@ -69,6 +70,9 @@
                     </c:if>
                   </td>
                   <td>
+                    <c:out value="${client.emailClient}" />
+                  </td>
+                  <td>
                     <span class="badge badge-outline">
                       <c:out value="${client.nombreProjets}" />
                     </span>
@@ -79,7 +83,8 @@
                               data-client-id="${client.idClient}"
                               data-entreprise="${client.entrepriseClient}"
                               data-nom="${client.nomClient}"
-                              data-prenom="${client.prenomClient}">
+                              data-prenom="${client.prenomClient}"
+                              data-email-client="${client.emailClient}">
                         <i data-lucide="edit-2"></i>
                       </button>
                       <button type="button" class="btn-icon btn-icon-sm text-red-500 delete-client-btn" title="Supprimer"
@@ -94,7 +99,7 @@
             </c:when>
             <c:otherwise>
               <tr>
-                <td colspan="4" class="text-center text-muted" style="padding: 3rem;">
+                <td colspan="5" class="text-center text-muted" style="padding: 3rem;">
                   <i data-lucide="briefcase" style="width: 48px; height: 48px; opacity: 0.2; margin: 0 auto 1rem;"></i>
                   <p>Aucun client n'est enregistré dans le système.</p>
                 </td>
@@ -151,6 +156,14 @@
               <i data-lucide="user"></i>
               <input type="text" id="prenom" name="prenom" class="form-control" placeholder="Ex: Jean (Optionnel)" />
             </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="emailClient">Adresse Email</label>
+          <div class="input-with-icon">
+            <i data-lucide="mail"></i>
+            <input type="email" id="emailClient" name="emailClient" class="form-control" placeholder="Ex: contact@entreprise.com" />
           </div>
         </div>
 

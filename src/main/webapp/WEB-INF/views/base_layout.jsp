@@ -48,7 +48,6 @@
     <div class="modal-card">
       <header class="modal-header">
         <h2 id="logout-modal-title">Confirmer la déconnexion</h2>
-        <button type="button" class="modal-close" aria-label="Fermer la fenêtre"></button>
       </header>
       <div class="modal-body">
         <p>Voulez-vous vraiment vous déconnecter de EnvHub ?</p>

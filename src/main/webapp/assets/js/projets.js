@@ -1,45 +1,64 @@
 (function initProjetsLocal() {
-    const searchInput = document.getElementById('search-input');
-    const searchForm = document.getElementById('search-form');
-    const tableBody = document.getElementById('projets-table-body');
-    
-    if (searchInput && tableBody) {
-      searchInput.addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase();
+  const searchInput = document.getElementById('search-input');
+  const searchForm = document.getElementById('search-form');
+  
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      let hasVisibleItems = false;
+      
+      // 1. Recherche dans le TABLEAU (Vue Admin)
+      const tableBody = document.getElementById('projets-table-body');
+      if (tableBody) {
         const rows = tableBody.querySelectorAll('tr');
-        let hasVisibleRows = false;
-        
         rows.forEach(row => {
           if (row.cells.length > 1) {
             const text = row.textContent.toLowerCase();
             if (text.includes(term)) {
               row.style.display = '';
-              hasVisibleRows = true;
+              hasVisibleItems = true;
             } else {
               row.style.display = 'none';
             }
           }
         });
-  
-        const noResultsMessage = document.getElementById('no-results-message');
-        const noResultsQuery = document.getElementById('no-results-query');
-        if (noResultsMessage && noResultsQuery) {
-          if (!hasVisibleRows && term.trim() !== '') {
-            noResultsQuery.textContent = e.target.value;
-            noResultsMessage.style.display = 'flex';
+      }
+
+      // 2. Recherche dans la GRILLE (Vue Développeur)
+      const gridContainer = document.querySelector('.projets-grid');
+      if (gridContainer) {
+        const cards = gridContainer.querySelectorAll('.projet-card');
+        cards.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          if (text.includes(term)) {
+            card.style.display = ''; // Affiche la carte
+            hasVisibleItems = true;
           } else {
-            noResultsMessage.style.display = 'none';
+            card.style.display = 'none'; // Cache la carte
           }
-        }
-      });
-  
-      if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-          e.preventDefault();
         });
       }
+
+      // 3. Gestion du message "Aucun résultat"
+      const noResultsMessage = document.getElementById('no-results-message');
+      const noResultsQuery = document.getElementById('no-results-query');
+      if (noResultsMessage && noResultsQuery) {
+        if (!hasVisibleItems && term.trim() !== '') {
+          noResultsQuery.textContent = e.target.value;
+          noResultsMessage.style.display = 'flex';
+        } else {
+          noResultsMessage.style.display = 'none';
+        }
+      }
+    });
+
+    if (searchForm) {
+      searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+      });
     }
-  })();
+  }
+})();
   
   if (!window.projetsJsInitialized) {
     window.projetsJsInitialized = true;

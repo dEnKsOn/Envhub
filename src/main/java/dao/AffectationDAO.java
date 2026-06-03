@@ -12,6 +12,7 @@ import models.Affectation;
 import models.Profil;
 import models.Projet;
 import models.RoleProjet;
+import models.StatutProjet;
 import models.Utilisateur;
 import utils.DbConnection;
 
@@ -38,6 +39,50 @@ public class AffectationDAO {
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de la récupération des affectations : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return affectations;
+    }
+
+    /**
+     * =================================================================================
+     * NOUVELLE MÉTHODE POUR L'ESPACE DÉVELOPPEUR
+     * Récupère toutes les affectations d'un utilisateur avec les détails du projet
+     * =================================================================================
+     */
+    public List<Affectation> findByUtilisateur(UUID idUser) {
+        List<Affectation> affectations = new ArrayList<>();
+        String sql = "SELECT a.idProjet, a.idUser, a.roleProjet, "
+                   + "p.nomProjet, p.descriptionTech, p.dateLancement, p.statutProjet, p.pourcentageAvancement, "
+                   + "u.nomUser, u.prenomUser, u.email, u.idProfil, prof.libelle "
+                   + "FROM Affectation a "
+                   + "JOIN Projet p ON a.idProjet = p.idProjet "
+                   + "JOIN Utilisateur u ON a.idUser = u.idUser "
+                   + "JOIN Profil prof ON u.idProfil = prof.idProfil "
+                   + "WHERE a.idUser = ? "
+                   + "ORDER BY p.dateLancement DESC";
+
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idUser.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Affectation affectation = mapAffectation(rs);
+                    
+                    // On enrichit l'objet Projet avec les données de la jointure
+                    Projet projet = affectation.getProjet();
+                    projet.setNomProjet(rs.getString("nomProjet"));
+                    projet.setDescriptionTech(rs.getString("descriptionTech"));
+                    projet.setDateLancement(rs.getDate("dateLancement"));
+                    projet.setStatutProjet(StatutProjet.valueOf(rs.getString("statutProjet")));
+                    projet.setPourcentageAvancement(rs.getInt("pourcentageAvancement"));
+                    
+                    affectations.add(affectation);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des affectations de l'utilisateur : " + e.getMessage());
             e.printStackTrace();
         }
         return affectations;
@@ -124,10 +169,14 @@ public class AffectationDAO {
         utilisateur.setPrenomUser(rs.getString("prenomUser"));
         utilisateur.setEmail(rs.getString("email"));
 
-        Profil profil = new Profil();
-        profil.setIdProfil(rs.getInt("idProfil"));
-        profil.setLibelle(rs.getString("libelle"));
-        utilisateur.setProfil(profil);
+        try {
+            Profil profil = new Profil();
+            profil.setIdProfil(rs.getInt("idProfil"));
+            profil.setLibelle(rs.getString("libelle"));
+            utilisateur.setProfil(profil);
+        } catch (SQLException ex) {
+            // Si la requête ne joint pas la table Profil, on l'ignore silencieusement
+        }
 
         affectation.setUtilisateur(utilisateur);
         return affectation;

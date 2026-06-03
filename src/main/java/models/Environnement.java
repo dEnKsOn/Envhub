@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class Environnement {
@@ -22,6 +23,8 @@ public class Environnement {
     private Serveur serveur;
     private Projet projet;
     private Utilisateur createur; 
+
+    private List<VersionTechno> versions;
 
     public Environnement() {
     }
@@ -66,4 +69,7 @@ public class Environnement {
 
     public Utilisateur getCreateur() { return createur; }
     public void setCreateur(Utilisateur createur) { this.createur = createur; }
+
+    public List<VersionTechno> getVersions() { return versions; }
+    public void setVersions(List<VersionTechno> versions) { this.versions = versions; }
 }

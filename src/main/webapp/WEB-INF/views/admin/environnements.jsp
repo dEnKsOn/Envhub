@@ -1,6 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/healthcheck.css">
 
 <div class="page-header">
     <div>
@@ -10,7 +13,6 @@
 </div>
 
 <div class="filters-panel">
-    
     <div class="filter-group">
         <i data-lucide="building"></i>
         <select id="filter-client" class="form-control filter-select">
@@ -55,7 +57,7 @@
                     <th>Type</th>
                     <th>Projet Associé</th>
                     <th>Hébergement</th>
-                    <th>Stack & Base de données</th>
+                    <th>Stack & Points d'accès</th>
                     <th>Traçabilité</th>
                     <th class="text-right">Actions</th>
                 </tr>
@@ -83,7 +85,7 @@
                             <div class="tech-info">
                                 <c:choose>
                                     <c:when test="${not empty env.serveur}">
-                                        <span class="font-mono"><c:out value="${env.serveur.adressIP}" /></span>
+                                        <span class="font-mono"> <span class="health-indicator status-pending" data-ip="${env.serveur.adressIP}"></span><c:out value="${env.serveur.adressIP}" /></span>
                                         <span class="text-xs text-muted"><c:out value="${env.serveur.os}" /></span>
                                     </c:when>
                                     <c:otherwise>
@@ -97,9 +99,20 @@
                         <td class="tech-cell">
                             <div class="tech-info">
                                 <span class="db-name">BD : <c:out value="${env.nomBaseDeDonnees}" default="N/A" /></span>
-                                <div class="urls-mini">
-                                    <c:if test="${not empty env.urlFront}"><span title="${env.urlFront}">Front</span></c:if>
-                                    <c:if test="${not empty env.urlBack}"><span title="${env.urlBack}">API</span></c:if>
+                                <div class="env-access-links" style="margin-top: 4px;">
+                                    <c:if test="${not empty env.urlFront}">
+                                      <a href="<c:out value='${env.urlFront}'/>" target="_blank" class="env-access-btn env-access-btn-front" title="Ouvrir Front-end">
+                                        <i data-lucide="monitor"></i> <c:out value='${env.urlFront}'/>
+                                      </a>
+                                    </c:if>
+                                    <c:if test="${not empty env.urlBack}">
+                                      <a href="<c:out value='${env.urlBack}'/>" target="_blank" class="env-access-btn env-access-btn-back" title="Ouvrir Back-end">
+                                        <i data-lucide="plug"></i> <c:out value='${env.urlBack}'/>
+                                      </a>
+                                    </c:if>
+                                    <c:if test="${empty env.urlFront and empty env.urlBack}">
+                                       <span class="text-muted text-sm">—</span>
+                                    </c:if>
                                 </div>
                             </div>
                         </td>
@@ -115,14 +128,38 @@
                         </td>
 
                         <td class="text-right">
+                            <c:set var="nomClientAffiche" value="Non défini" />
+                            <c:forEach items="${clients}" var="c">
+                                <c:if test="${c.idClient == env.projet.idClient}">
+                                    <c:choose>
+                                        <c:when test="${not empty c.entrepriseClient}">
+                                            <c:set var="nomClientAffiche" value="${c.entrepriseClient}" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="nomClientAffiche" value="${c.nomClient} ${c.prenomClient}" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:if>
+                            </c:forEach>
+
+                            <c:set var="technoJson" value="[" />
+                            <c:forEach items="${env.versions}" var="vt" varStatus="loop">
+                                <c:set var="technoJson" value="${technoJson}{\"id\":\"${vt.technologie.idTechno}\", \"nom\":\"${fn:escapeXml(vt.technologie.nomTechno)}\", \"version\":\"${fn:escapeXml(vt.version)}\"}${!loop.last ? ',' : ''}" />
+                            </c:forEach>
+                            <c:set var="technoJson" value="${technoJson}]" />
+
                             <div class="actions-flex">
                                 <button type="button" class="btn-icon btn-view-env" 
-                                        data-id="${env.idEnv}"
-                                        data-front="${env.urlFront}"
-                                        data-back="${env.urlBack}"
-                                        data-db="${env.nomBaseDeDonnees}"
-                                        data-notes="${env.notes}"
-                                        title="Kit de Configuration">
+                                        data-env-type="${env.typeEnv}"
+                                        data-env-db="${env.nomBaseDeDonnees}"
+                                        data-env-server-ip="${not empty env.serveur ? env.serveur.adressIP : ''}"
+                                        data-env-server-os="${not empty env.serveur ? env.serveur.os : ''}"
+                                        data-env-url-front="<c:out value='${env.urlFront}'/>"
+                                        data-env-url-back="<c:out value='${env.urlBack}'/>"
+                                        data-env-technos='${technoJson}'
+                                        data-env-projet="<c:out value='${env.projet.nomProjet}'/>"
+                                        data-env-client="<c:out value='${nomClientAffiche}'/>"
+                                        title="Voir la configuration">
                                     <i data-lucide="eye"></i>
                                 </button>
                                 <a href="${pageContext.request.contextPath}/admin/projets/details?id=${env.projet.idProjet}" class="btn-icon" title="Aller à la fiche projet">
@@ -137,48 +174,55 @@
     </div>
 </div>
 
-<div id="modal-env-details" class="modal-overlay">
-    <div class="modal-card">
-        <header class="modal-header">
-            <div class="modal-header-content">
-                <div class="modal-icon"><i data-lucide="server-cog"></i></div>
-                <div>
-                    <h3>Kit de Configuration</h3>
-                    <p class="text-xs text-muted">Paramètres d'accès réseau de l'instance</p>
-                </div>
-            </div>
-            <button type="button" class="modal-close" id="btn-close-modal"><i data-lucide="x"></i></button>
-        </header>
-        
-        <div class="modal-body">
-            <div class="config-grid">
-                <div class="config-item">
-                    <span class="config-label">URL Front-end</span>
-                    <div class="copy-box">
-                        <span id="modal-front-url" class="font-mono">...</span>
-                        <button class="btn-copy" title="Copier"><i data-lucide="copy"></i></button>
-                    </div>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">URL API / Back-end</span>
-                    <div class="copy-box">
-                        <span id="modal-back-url" class="font-mono">...</span>
-                        <button class="btn-copy" title="Copier"><i data-lucide="copy"></i></button>
-                    </div>
-                </div>
-                <div class="config-item">
-                    <span class="config-label">Base de données cible</span>
-                    <div class="copy-box">
-                        <span id="modal-db-name" class="font-mono">...</span>
-                        <button class="btn-copy" title="Copier"><i data-lucide="copy"></i></button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="notes-container mt-4">
-                <span class="config-label">Notes techniques / Scripts de lancement</span>
-                <div class="notes-box" id="modal-notes"></div>
-            </div>
+<div id="view-env-modal" class="modal-overlay is-hidden" role="dialog" aria-modal="true">
+  <div class="modal-card" style="width: min(600px, 95vw);">
+    <header class="modal-header" style="align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);">
+      <div class="modal-header-content">
+        <div class="modal-header-icon" style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); color: #4F46E5; border-color: rgba(79, 70, 229, 0.15);">
+          <i data-lucide="eye"></i>
         </div>
+        <div>
+          <h2 style="display:flex; align-items:center; gap:8px;">
+            Détails Environnement 
+            <span id="view-env-type" class="badge badge-outline" style="font-size:0.7rem;"></span>
+          </h2>
+          <p class="text-xs text-muted" style="margin-top: 4px;">
+            Projet : <strong id="view-env-projet" style="color: #0F172A;">...</strong> — 
+            Client : <strong id="view-env-client" style="color: #0F172A;">...</strong>
+          </p>
+        </div>
+      </div>
+      <button type="button" class="modal-close"><i data-lucide="x"></i></button>
+    </header>
+    
+    <div class="modal-body stack stack-md" style="padding: 0 16px 0 16px;">
+      <div class="grid grid-2" style="margin: 16px 0 16px 0;">
+        <div>
+          <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700;">Serveur Hôte</span>
+          <p id="view-env-server" class="mt-1" style="font-weight:600; display:flex; align-items:center;"></p>
+        </div>
+        <div>
+          <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700;">Base de données</span>
+          <p class="mt-1"><code id="view-env-db" style="padding:4px 8px; background:#F8FAFC; border-radius:6px; border:1px solid #E2E8F0;"></code></p>
+        </div>
+      </div>
+
+      <div style="margin: 0 0 16px 0;">
+        <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700; display:block; margin-bottom:8px;">Points d'accès</span>
+        <div id="view-env-links" class="flex gap-2 wrap" ></div>
+      </div>
+
+      <div>
+        <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700; display:block; margin-bottom:8px;">Stack Technique & Versions</span>
+        <div id="view-env-technos" class="flex gap-2 wrap"></div>
+      </div>
+    
     </div>
+    <div class="modal-actions" style="border-top: 1px solid var(--border-light); margin: 16px 0 16px 0;">
+      <button type="button" class="btn btn-secondary modal-close" style="width: 100%;">Fermer</button>
+    </div>
+  </div>
 </div>
+
+<script>const CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+<script src="${pageContext.request.contextPath}/assets/js/healthcheck.js"></script>

@@ -1,8 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isELIgnored="false" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-
-<div class="stack stack-lg projet-details-page">
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %> <div class="stack stack-lg projet-details-page">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/healthcheck.css">
 
   <div class="flex items-center justify-between gap-4 wrap projet-details-toolbar">
     <div>
@@ -101,8 +101,8 @@
               <tr>
                 <th>Type</th>
                 <th>Serveur hôte</th>
-                <th>Points d'accès</th>
-                <th>Base de données</th>
+                <th>Accès Rapide</th>
+                <th class="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -124,6 +124,7 @@
                       <td>
                         <c:choose>
                           <c:when test="${not empty env.serveur and not empty env.serveur.adressIP}">
+                            <span class="health-indicator status-pending" data-ip="${env.serveur.adressIP}"></span>
                             <span class="env-server-host">
                               <i data-lucide="server" class="env-server-icon"></i>
                               <span>
@@ -141,47 +142,40 @@
                       </td>
                       <td>
                         <div class="env-access-links">
-                          <c:choose>
-                            <c:when test="${not empty env.urlFront}">
-                              <a href="<c:out value='${env.urlFront}'/>" target="_blank" rel="noopener noreferrer"
-                                 class="env-access-btn env-access-btn-front" title="Ouvrir le front-end">
-                                <i data-lucide="monitor"></i>
-                                <span>Front</span>
-                              </a>
-                            </c:when>
-                            <c:otherwise>
-                              <span class="env-access-btn is-disabled" title="URL front non renseignée">
-                                <i data-lucide="monitor"></i>
-                                <span>Front</span>
-                              </span>
-                            </c:otherwise>
-                          </c:choose>
-                          <c:choose>
-                            <c:when test="${not empty env.urlBack}">
-                              <a href="<c:out value='${env.urlBack}'/>" target="_blank" rel="noopener noreferrer"
-                                 class="env-access-btn env-access-btn-back" title="Ouvrir l'API / back-end">
-                                <i data-lucide="plug"></i>
-                                <span>API/Back</span>
-                              </a>
-                            </c:when>
-                            <c:otherwise>
-                              <span class="env-access-btn is-disabled" title="URL back non renseignée">
-                                <i data-lucide="plug"></i>
-                                <span>API/Back</span>
-                              </span>
-                            </c:otherwise>
-                          </c:choose>
+                          <c:if test="${not empty env.urlFront}">
+                            <a href="<c:out value='${env.urlFront}'/>" target="_blank" class="env-access-btn env-access-btn-front" title="Ouvrir Front-end">
+                              <i data-lucide="monitor"></i> <c:out value='${env.urlFront}'/>
+                            </a>
+                          </c:if>
+                          <c:if test="${not empty env.urlBack}">
+                            <a href="<c:out value='${env.urlBack}'/>" target="_blank" class="env-access-btn env-access-btn-back" title="Ouvrir Back-end">
+                              <i data-lucide="plug"></i> <c:out value='${env.urlBack}'/>
+                            </a>
+                          </c:if>
+                          <c:if test="${empty env.urlFront and empty env.urlBack}">
+                             <span class="text-muted text-sm">—</span>
+                          </c:if>
                         </div>
                       </td>
-                      <td>
-                        <c:choose>
-                          <c:when test="${not empty env.nomBaseDeDonnees}">
-                            <code class="env-db-name"><c:out value="${env.nomBaseDeDonnees}" /></code>
-                          </c:when>
-                          <c:otherwise>
-                            <span class="text-muted">—</span>
-                          </c:otherwise>
-                        </c:choose>
+                      <td class="text-right">
+                        <c:set var="technoJson" value="[" />
+                        <c:forEach items="${env.versions}" var="vt" varStatus="loop">
+                          <c:set var="technoJson" value="${technoJson}{\"id\":\"${vt.technologie.idTechno}\", \"nom\":\"${fn:escapeXml(vt.technologie.nomTechno)}\", \"version\":\"${fn:escapeXml(vt.version)}\"}${!loop.last ? ',' : ''}" />
+                        </c:forEach>
+                        <c:set var="technoJson" value="${technoJson}]" />
+
+                        <div class="flex items-center justify-end gap-2">
+                          <button type="button" class="btn-icon btn-icon-sm text-primary btn-view-env" title="Voir la configuration"
+                                  data-env-type="${env.typeEnv}"
+                                  data-env-db="${env.nomBaseDeDonnees}"
+                                  data-env-server-ip="${not empty env.serveur ? env.serveur.adressIP : ''}"
+                                  data-env-server-os="${not empty env.serveur ? env.serveur.os : ''}"
+                                  data-env-url-front="<c:out value='${env.urlFront}'/>"
+                                  data-env-url-back="<c:out value='${env.urlBack}'/>"
+                                  data-env-technos='${technoJson}'>
+                            <i data-lucide="eye"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   </c:forEach>
@@ -304,13 +298,54 @@
         </c:if>
 
         <c:if test="${canManageTeam}">
-          <button type="button" class="btn btn-secondary btn-block mt-2" id="btn-manage-team">
+          <button type="button" class="btn btn-secondary btn-block mt-2" id="btn-manage-team" style="width: 100%;">
             <i data-lucide="users"></i>
             Gérer l'équipe
           </button>
         </c:if>
       </section>
     </aside>
+  </div>
+</div>
+
+<div id="view-env-modal" class="modal-overlay is-hidden" role="dialog" aria-modal="true">
+  <div class="modal-card" style="width: min(600px, 95vw);">
+    <header class="modal-header" style="align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid var(--border-light);">
+      <div class="modal-header-content">
+        <div class="modal-header-icon"><i data-lucide="eye"></i></div>
+        <div>
+          <h2 style="display:flex; align-items:center; gap:8px;">Détails Environnement <span id="view-env-type" class="badge badge-outline" style="font-size:0.7rem;"></span></h2>
+        </div>
+      </div>
+      <button type="button" class="modal-close"><i data-lucide="x"></i></button>
+    </header>
+    
+    <div class="modal-body stack stack-md" style="padding: 0 16px 0 16px;">
+      <div class="grid grid-2" style="margin: 16px 0 16px 0;">
+        <div>
+          <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700;">Serveur Hôte</span>
+          <p id="view-env-server" class="mt-1" style="font-weight:600; display:flex; align-items:center;"></p>
+        </div>
+        <div>
+          <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700;">Base de données</span>
+          <p class="mt-1"><code id="view-env-db" style="padding:4px 8px; background:#F8FAFC; border-radius:6px; border:1px solid #E2E8F0;"></code></p>
+        </div>
+      </div>
+
+      <div style="margin: 0 0 16px 0;">
+        <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700; display:block; margin-bottom:8px;">Points d'accès</span>
+        <div id="view-env-links" class="flex gap-2 wrap" ></div>
+      </div>
+
+      <div>
+        <span class="text-xs text-muted" style="text-transform:uppercase; font-weight:700; display:block; margin-bottom:8px;">Stack Technique & Versions</span>
+        <div id="view-env-technos" class="flex gap-2 wrap"></div>
+      </div>
+    
+    </div>
+    <div class="modal-actions" style="border-top: 1px solid var(--border-light); margin: 16px 0 16px 0;">
+      <button type="button" class="btn btn-secondary modal-close" style="width: 100%;">Fermer</button>
+    </div>
   </div>
 </div>
 
@@ -477,3 +512,6 @@
   </div>
 </div>
 </c:if>
+
+<script>const CONTEXT_PATH = '${pageContext.request.contextPath}';</script>
+<script src="${pageContext.request.contextPath}/assets/js/healthcheck.js"></script>
