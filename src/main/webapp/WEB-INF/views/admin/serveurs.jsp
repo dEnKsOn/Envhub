@@ -173,7 +173,7 @@
           <div class="form-group">
             <label for="ramGb">RAM en Go (Optionnel)</label>
             <div class="input-with-icon">
-              <i data-lucide="memory"></i>
+              <i data-lucide="memory-stick"></i>
               <input type="number" id="ramGb" name="ramGb" min="1" class="form-control" placeholder="Ex: 16" />
             </div>
           </div>

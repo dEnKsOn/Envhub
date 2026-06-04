@@ -174,3 +174,39 @@
 .btn-danger:hover {
   background: #991b1b;
 }
+
+
+  /* =========================================
+   BADGES DE RÔLE (Dashboard Dev)
+   ========================================= */
+   .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  
+  .role-badge i {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Style classique pour le Développeur */
+  .role-badge-dev {
+    background: var(--bg-surface);
+    color: var(--text-main);
+    border: 1px solid var(--border-light);
+  }
+  
+  /* Style Premium Gold pour le Chef de Projet (Inspiré de projets-details) */
+  .role-badge-chef {
+    background: #FEF3C7;       /* --chef-bg */
+    color: #B45309;            /* --chef-text */
+    border: 1px solid rgba(245, 158, 11, 0.3); /* --chef-border */
+  }

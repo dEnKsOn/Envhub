@@ -14,6 +14,8 @@ import models.Projet;
 import models.Serveur;
 import models.TypeEnvironnement;
 import models.Utilisateur;
+import models.Technologie;
+import models.VersionTechno;
 import utils.DbConnection;
 
 public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
@@ -36,7 +38,8 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, id.toString());
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return mapEnvironnement(rs);
+                // Ajout de la connexion en paramètre pour charger les technologies
+                if (rs.next()) return mapEnvironnement(rs, conn);
             }
         } catch (SQLException e) {
             System.err.println("Erreur (findById) Environnement : " + e.getMessage());
@@ -51,14 +54,16 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         try (Connection conn = DbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) environnements.add(mapEnvironnement(rs));
+            while (rs.next()) {
+                environnements.add(mapEnvironnement(rs, conn));
+            }
         } catch (SQLException e) {
             System.err.println("Erreur (findAll) Environnements : " + e.getMessage());
         }
         return environnements;
     }
 
-    // --- NOUVELLE FONCTIONNALITÉ MÉTIER ---
+    // --- FONCTIONNALITÉS MÉTIER ---
     public List<Environnement> findByClient(UUID idClient) {
         List<Environnement> environnements = new ArrayList<>();
         String sql = BASE_SELECT_QUERY + " WHERE p.idClient = ? ORDER BY p.nomProjet ASC, e.dateCreation DESC";
@@ -66,7 +71,7 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, idClient.toString());
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) environnements.add(mapEnvironnement(rs));
+                while (rs.next()) environnements.add(mapEnvironnement(rs, conn));
             }
         } catch (SQLException e) {
             System.err.println("Erreur (findByClient) : " + e.getMessage());
@@ -81,7 +86,7 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, idProjet.toString());
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) environnements.add(mapEnvironnement(rs));
+                while (rs.next()) environnements.add(mapEnvironnement(rs, conn));
             }
         } catch (SQLException e) {
             System.err.println("Erreur (findByProjet) : " + e.getMessage());
@@ -159,7 +164,10 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         }
     }
 
-    private Environnement mapEnvironnement(ResultSet rs) throws SQLException {
+    /**
+     * MAPPING PRINCIPAL : Hydrate l'objet Environnement depuis le ResultSet
+     */
+    private Environnement mapEnvironnement(ResultSet rs, Connection conn) throws SQLException {
         Environnement environnement = new Environnement();
         
         environnement.setIdEnv(UUID.fromString(rs.getString("idEnv")));
@@ -197,6 +205,81 @@ public class EnvironnementDAO implements IGenericDAO<Environnement, UUID> {
         createur.setPrenomUser(rs.getString("prenomCreateur"));
         environnement.setCreateur(createur);
 
+        // HYDRATATION DES TECHNOLOGIES
+        loadVersions(environnement, conn);
+
         return environnement;
+    }
+
+    /**
+     * Récupère et injecte la liste des technologies/versions pour un environnement
+     * Adapté strictement aux entités VersionTechno et Technologie.
+     */
+    private void loadVersions(Environnement env, Connection conn) {
+        List<VersionTechno> versions = new ArrayList<>();
+        
+        String sql = "SELECT vt.version, t.idTechno, t.nomTechno " +
+                     "FROM VersionTechno vt " +
+                     "INNER JOIN Technologie t ON vt.idTechno = t.idTechno " +
+                     "WHERE vt.idEnv = ?";
+                     
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, env.getIdEnv().toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Technologie tech = new Technologie();
+                    tech.setIdTechno(UUID.fromString(rs.getString("idTechno")));
+                    tech.setNomTechno(rs.getString("nomTechno"));
+                    
+                    VersionTechno vt = new VersionTechno();
+                    vt.setTechnologie(tech);
+                    vt.setVersion(rs.getString("version"));
+                    
+                    versions.add(vt);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors du chargement des technologies associées : " + e.getMessage());
+        }
+        
+        env.setVersions(versions);
+    }
+
+    /**
+     * Récupère tous les environnements liés aux projets d'un utilisateur spécifique.
+     * Idéal pour le tableau de bord "Mes Environnements" du Développeur.
+     */
+    public List<Environnement> findByUtilisateur(UUID idUser) {
+        List<Environnement> environnements = new ArrayList<>();
+        // On récupère l'environnement, le nom du projet associé, et les infos du serveur
+        String sql = "SELECT e.*, p.nomProjet, s.nomServeur, s.adressIP "
+                   + "FROM Environnement e "
+                   + "JOIN Projet p ON e.idProjet = p.idProjet "
+                   + "JOIN Affectation a ON p.idProjet = a.idProjet "
+                   + "LEFT JOIN Serveur s ON e.idServ = s.idServ "
+                   + "WHERE a.idUser = ? "
+                   + "ORDER BY p.nomProjet ASC, e.typeEnv ASC";
+
+        try (Connection conn = DbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, idUser.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Environnement env = mapEnvironnement(rs, conn); 
+                    
+                    // On enrichit manuellement le nom du projet car on l'a récupéré dans le SELECT
+                    Projet p = env.getProjet();
+                    if (p == null) { p = new Projet(); }
+                    p.setNomProjet(rs.getString("nomProjet"));
+                    env.setProjet(p);
+                    
+                    environnements.add(env);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des environnements du dev : " + e.getMessage());
+        }
+        return environnements;
     }
 }

@@ -71,7 +71,7 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/dashboard");
             } else if ("Développeur".equals(role)) {
                 // Le développeur est redirigé vers son espace dédié
-                response.sendRedirect(request.getContextPath() + "/dev/mes-projets");
+                response.sendRedirect(request.getContextPath() + "/dev/dashboard");
             } else {
                 // Rôle inconnu (Sécurité)
                 newSession.invalidate();
