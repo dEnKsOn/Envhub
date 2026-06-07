@@ -3,6 +3,7 @@ package controllers.dev;
 import dao.AffectationDAO;
 import dao.EnvironnementDAO;
 import dao.VersionTechnoDAO;
+import dao.ProjetDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -91,8 +92,6 @@ public class DevEditEnvironnementServlet extends HttpServlet {
             environnementDAO.update(env);
 
             // 2. Gestion des Technologies (On efface tout et on recrée)
-            // Note: Si tu n'as pas de méthode deleteByEnvironnement dans VersionTechnoDAO, 
-            // tu peux exécuter : DELETE FROM VersionTechno WHERE idEnv = ?
             Connection conn = utils.DbConnection.getConnection();
             java.sql.PreparedStatement stmt = conn.prepareStatement("DELETE FROM VersionTechno WHERE idEnv = ?");
             stmt.setString(1, env.getIdEnv().toString());
@@ -119,6 +118,12 @@ public class DevEditEnvironnementServlet extends HttpServlet {
                     }
                 }
             }
+
+            // =========================================================
+            // DÉCLENCHEUR EVENT-DRIVEN : Recalcul de la progression
+            // =========================================================
+            ProjetDAO projetDAO = new ProjetDAO();
+            projetDAO.evaluerProgression(idProjetPourRedirection);
 
             response.sendRedirect(request.getContextPath() + "/dev/mes-projets/details?id=" + idProjetPourRedirection + "&success=1");
 
