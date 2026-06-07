@@ -3,6 +3,7 @@ package controllers.dev;
 import dao.AffectationDAO;
 import dao.EnvironnementDAO;
 import dao.VersionTechnoDAO;
+import dao.ProjetDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -51,7 +52,6 @@ public class DevAddEnvironnementServlet extends HttpServlet {
         try {
             UUID idProjet = UUID.fromString(projetIdStr);
 
-            // 1. SÉCURITÉ : Vérification du rôle sur ce projet
             RoleProjet monRole = affectationDAO.findRoleOnProjet(idProjet, currentUser.getIdUser());
             if (monRole == null) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Accès refusé.");
@@ -60,35 +60,28 @@ public class DevAddEnvironnementServlet extends HttpServlet {
 
             TypeEnvironnement requestedType = TypeEnvironnement.valueOf(request.getParameter("typeEnv"));
             
-            // 2. RÈGLE MÉTIER : Un développeur ne peut créer que LOCAL ou DEVELOPPEMENT
             if (monRole == RoleProjet.DEVELOPPEUR && 
                (requestedType == TypeEnvironnement.PRODUCTION || requestedType == TypeEnvironnement.STAGING)) {
                 response.sendRedirect(request.getContextPath() + "/dev/mes-projets/details?id=" + projetIdStr + "&error=Type non autorisé pour votre rôle.");
                 return;
             }
 
-            // 3. Création de l'Environnement (BLINDAGE DES IDs)
             Environnement env = new Environnement();
             env.setIdEnv(UUID.randomUUID()); 
             
-            // --- Projet ---
-            env.setIdProjet(idProjet); // Pour le DAO (si nécessaire)
+            env.setIdProjet(idProjet); 
             Projet pEnv = new Projet(); 
             pEnv.setIdProjet(idProjet);
-            env.setProjet(pEnv);       // Pour le DAO (objet complet)
+            env.setProjet(pEnv);       
             
             env.setTypeEnv(requestedType);
+            env.setIdCreator(currentUser.getIdUser());
+            env.setCreateur(currentUser);
             
-            // --- Créateur ---
-            env.setIdCreator(currentUser.getIdUser()); // Pour éviter le NullPointerException
-            env.setCreateur(currentUser);              // Objet complet
-            
-            // --- Serveur ---
             String idServeurStr = request.getParameter("serveurId");
             if (idServeurStr != null && !idServeurStr.trim().isEmpty()) {
                 UUID idServ = UUID.fromString(idServeurStr);
-                env.setIdServ(idServ); // Pour éviter le NullPointerException
-                
+                env.setIdServ(idServ);
                 Serveur s = new Serveur(); 
                 s.setIdServ(idServ);
                 env.setServeur(s);
@@ -101,10 +94,8 @@ public class DevAddEnvironnementServlet extends HttpServlet {
             env.setUrlBack(request.getParameter("urlBack"));
             env.setNomBaseDeDonnees(request.getParameter("dbName"));
             
-            // SAUVEGARDE ENVIRONNEMENT
             environnementDAO.save(env);
 
-            // 4. Traitement dynamique des Technologies et Versions
             String[] technoIds = request.getParameterValues("technoIds[]");
             String[] technoVersions = request.getParameterValues("technoVersions[]");
 
@@ -115,25 +106,23 @@ public class DevAddEnvironnementServlet extends HttpServlet {
 
                     if (tIdStr != null && !tIdStr.trim().isEmpty()) {
                         VersionTechno vt = new VersionTechno();
-                        
-                        // L'environnement lié
                         vt.setEnvironnement(env);
-                        
-                        // La technologie liée
                         Technologie techno = new Technologie();
                         techno.setIdTechno(UUID.fromString(tIdStr));
                         vt.setTechnologie(techno);
-                        
-                        // La version
                         vt.setVersion(tVersion);
                         
-                        // SAUVEGARDE LIAISON
                         versionTechnoDAO.save(vt);
                     }
                 }
             }
 
-            // 5. Redirection avec succès
+            // =========================================================
+            // DÉCLENCHEUR EVENT-DRIVEN : Recalcul de la progression
+            // =========================================================
+            ProjetDAO projetDAO = new ProjetDAO();
+            projetDAO.evaluerProgression(idProjet);
+
             response.sendRedirect(request.getContextPath() + "/dev/mes-projets/details?id=" + idProjet.toString() + "&success=1");
 
         } catch (Exception e) {

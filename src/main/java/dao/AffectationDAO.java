@@ -44,12 +44,6 @@ public class AffectationDAO {
         return affectations;
     }
 
-    /**
-     * =================================================================================
-     * NOUVELLE MÉTHODE POUR L'ESPACE DÉVELOPPEUR
-     * Récupère toutes les affectations d'un utilisateur avec les détails du projet
-     * =================================================================================
-     */
     public List<Affectation> findByUtilisateur(UUID idUser) {
         List<Affectation> affectations = new ArrayList<>();
         String sql = "SELECT a.idProjet, a.idUser, a.roleProjet, "
@@ -70,7 +64,6 @@ public class AffectationDAO {
                 while (rs.next()) {
                     Affectation affectation = mapAffectation(rs);
                     
-                    // On enrichit l'objet Projet avec les données de la jointure
                     Projet projet = affectation.getProjet();
                     projet.setNomProjet(rs.getString("nomProjet"));
                     projet.setDescriptionTech(rs.getString("descriptionTech"));
@@ -135,7 +128,18 @@ public class AffectationDAO {
             stmt.setString(1, affectation.getProjet().getIdProjet().toString());
             stmt.setString(2, affectation.getUtilisateur().getIdUser().toString());
             stmt.setString(3, affectation.getRoleProjet().name());
-            return stmt.executeUpdate() > 0;
+            
+            boolean success = stmt.executeUpdate() > 0;
+            
+            // =========================================================
+            // DÉCLENCHEUR EVENT-DRIVEN : Recalcul de la progression
+            // =========================================================
+            if (success) {
+                ProjetDAO projetDAO = new ProjetDAO();
+                projetDAO.evaluerProgression(affectation.getProjet().getIdProjet());
+            }
+            
+            return success;
         }
     }
 
@@ -175,7 +179,7 @@ public class AffectationDAO {
             profil.setLibelle(rs.getString("libelle"));
             utilisateur.setProfil(profil);
         } catch (SQLException ex) {
-            // Si la requête ne joint pas la table Profil, on l'ignore silencieusement
+            // Ignoré silencieusement si la jointure n'est pas faite
         }
 
         affectation.setUtilisateur(utilisateur);
